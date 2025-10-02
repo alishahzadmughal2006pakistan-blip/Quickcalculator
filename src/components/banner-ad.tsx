@@ -8,10 +8,15 @@ import { useSettings } from '@/hooks/use-settings';
 export const BannerAd = () => {
     const { setPremium } = useSettings();
 
-    // TODO: GOOGLE ADMOB INTEGRATION
-    // This is where you would render the real Google AdMob banner ad component.
-    // For now, we are showing a promotional card to upgrade to premium.
-    
+    // =========================================================================
+    // TODO: GOOGLE ADMOB INTEGRATION - BANNER AD
+    // =========================================================================
+    // 1. Import the banner ad component from your AdMob library.
+    // 2. Replace the entire <Card> component below with the real AdMob banner ad component.
+    //    For example: <AdMobBannerAd unitId="YOUR_BANNER_AD_UNIT_ID" />
+    // 3. The banner should only be rendered if the user is NOT premium, which is already
+    //    handled by the logic in `src/app/page.tsx`.
+
     return (
         <Card className="w-full bg-primary/10 border-primary/20">
             <CardContent className="p-4 flex items-center justify-between">

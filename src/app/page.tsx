@@ -43,10 +43,16 @@ const SettingsScreen = () => {
     };
 
     const handleRestorePurchase = () => {
-        // TODO: GOOGLE PLAY BILLING INTEGRATION
-        // In a real app, this would involve calling your app store's SDK
-        // e.g., call Google Play Billing library to check for existing purchases.
-        // On success, you would then call setPremium(true).
+        // =================================================================================
+        // TODO: GOOGLE PLAY BILLING INTEGRATION - RESTORE PURCHASE
+        // =================================================================================
+        // 1. Call your Google Play Billing library's function to query for existing
+        //    purchases (e.g., `billingClient.queryPurchasesAsync`).
+        // 2. Check the response to see if the user owns the "premium" product.
+        // 3. If they do, call `setPremium(true)`.
+        // 4. If they don't, you can show a toast message like "No past purchases found."
+        //
+        // The code below simulates a successful restoration.
         console.log("Simulating restore purchase...");
         setPremium(true);
         toast({
@@ -99,9 +105,15 @@ const SettingsScreen = () => {
                             <p className="text-sm text-primary-foreground/80">Remove ads and unlock all advanced calculators permanently.</p>
                             <Button 
                                 onClick={() => {
-                                    // TODO: GOOGLE PLAY BILLING INTEGRATION
-                                    // In a real app, you would initiate the Google Play Billing flow here.
-                                    // On success, you would then call setPremium(true).
+                                    // =========================================================================
+                                    // TODO: GOOGLE PLAY BILLING INTEGRATION - INITIATE PURCHASE
+                                    // =========================================================================
+                                    // 1. Call your Google Play Billing library to fetch the product details
+                                    //    for your one-time purchase (e.g., product ID: "premium_unlock").
+                                    // 2. Launch the billing flow with the fetched product details.
+                                    // 3. In the callback for a successful purchase, call `setPremium(true)`.
+                                    //
+                                    // The code below simulates a successful purchase.
                                     console.log("Simulating premium purchase...");
                                     setPremium(true);
                                 }}

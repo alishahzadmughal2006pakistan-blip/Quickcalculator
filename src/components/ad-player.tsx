@@ -35,16 +35,23 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
             return;
         }
 
-        // TODO: GOOGLE ADMOB INTEGRATION
-        // This is where you would trigger the showing of a real AdMob rewarded video ad.
-        // You would typically have a callback for when the ad is completed by the user.
-        // The logic below simulates this with a timer.
+        // =========================================================================
+        // TODO: GOOGLE ADMOB INTEGRATION - REWARDED AD
+        // =========================================================================
+        // 1. When this `useEffect` hook runs, load a rewarded ad from AdMob.
+        // 2. Once the ad is loaded, show it to the user.
+        // 3. In the AdMob SDK's `onAdDismissedFullScreenContent` or `onAdShowedFullScreenContent`
+        //    with an error, you might want to call `onClose()` to close the dialog.
+        // 4. In the `onUserEarnedReward` callback from the AdMob SDK, call `onComplete()`.
+        //    This will grant the user access to the feature.
+        //
+        // The code below simulates this flow with a timer. You should replace it.
 
         const countdownInterval = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
                     clearInterval(countdownInterval);
-                    // This is the "on complete" callback from the ad.
+                    // This is where you call onComplete() after a real ad is watched.
                     onComplete();
                     toast({
                         title: `${featureName} Unlocked!`,
@@ -71,7 +78,7 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
             clearInterval(countdownInterval);
             clearInterval(progressInterval);
         };
-    }, [isOpen, onComplete, featureName, toast]);
+    }, [isOpen, onComplete, onClose, featureName, toast]);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
