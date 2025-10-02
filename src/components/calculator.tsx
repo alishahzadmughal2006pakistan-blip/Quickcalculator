@@ -153,7 +153,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
         '+': <Plus size={24} />,
     };
     
-    let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-full ${className}`;
+    let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-xl sm:rounded-full ${className}`;
 
     return (
         <Button
@@ -210,7 +210,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
                   ))}
                 </div>
             </ScrollArea>
-            <p className="text-5xl sm:text-6xl font-light text-foreground">{displayValue}</p>
+            <p className="text-4xl sm:text-6xl font-light text-foreground">{displayValue}</p>
           </div>
 
           <div className="grid grid-cols-5 gap-2">
@@ -235,7 +235,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
-            {renderButton('=','row-span-2 h-auto')}
+            {renderButton('=', 'col-start-4 row-start-4 row-span-2 h-auto')}
             {renderButton('-')}
             
             {renderButton('0', 'col-span-2')}
