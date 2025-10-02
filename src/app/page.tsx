@@ -30,7 +30,7 @@ import DiscountCalculator from '@/components/discount-calculator';
 import DataStorageConverter from '@/components/data-storage-converter';
 import TaxCalculator from '@/components/tax-calculator';
 import InvestmentReturnCalculator from '@/components/investment-return-calculator';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, useSidebar } from '@/components/ui/sidebar';
 
 const SplashScreen = () => (
   <div className="flex flex-col items-center justify-center h-screen w-screen bg-background animate-fade-in">
@@ -61,16 +61,14 @@ const allCalculators = {
   data: { component: <DataStorageConverter />, title: "Data Storage Converter" },
 };
 
-export default function Home() {
+function HomePageContent() {
   const [history, setHistory] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeCalculator, setActiveCalculator] = useState<string | null>('home');
   const [pinnedItems, setPinnedItems] = useState<PinnedItems>({});
+  const { setOpenMobile } = useSidebar();
+
 
   useEffect(() => {
-    // Splash screen timer
-    const timer = setTimeout(() => setLoading(false), 2000);
-    
     try {
       const storedHistory = localStorage.getItem('calculatorHistory');
       if (storedHistory) {
@@ -83,8 +81,6 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to load from localStorage", error);
     }
-
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -118,6 +114,11 @@ export default function Home() {
 
   const togglePin = (key: string) => {
     setPinnedItems(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleMenuClick = (calculatorKey: string) => {
+    setActiveCalculator(calculatorKey);
+    setOpenMobile(false); // Close mobile sidebar on selection
   };
 
   const renderActiveCalculator = () => {
@@ -184,8 +185,8 @@ export default function Home() {
       const isPinned = pinnedItems[activeCalculator as keyof typeof allCalculators];
       return (
         <div className="relative group max-w-4xl mx-auto">
-          {calculator.component}
-          <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-muted-foreground group-hover:text-foreground" onClick={() => togglePin(activeCalculator as keyof typeof allCalculators)}>
+          {React.cloneElement(calculator.component, { key: activeCalculator })}
+          <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-muted-foreground group-hover:text-foreground" onClick={() => togglePin(activeCalculator as string)}>
             {isPinned ? <PinOff className="w-5 h-5" /> : <Pin className="w-5 h-5" />}
           </Button>
         </div>
@@ -217,61 +218,75 @@ export default function Home() {
     ],
   };
 
+  return (
+    <Sidebar>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => handleMenuClick('home')} isActive={activeCalculator === 'home'}><Calculator /> Home</SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Free</SidebarGroupLabel>
+            {menuItems.free.map(({key, title}) => (
+              <SidebarMenuItem key={key}>
+                <SidebarMenuButton onClick={() => handleMenuClick(key)} isActive={activeCalculator === key}>{title}</SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarGroup>
+
+            <SidebarGroup>
+            <SidebarGroupLabel>Advanced</SidebarGroupLabel>
+            {menuItems.advanced.map(({key, title}) => (
+              <SidebarMenuItem key={key}>
+                <SidebarMenuButton onClick={() => handleMenuClick(key)} isActive={activeCalculator === key}>{title}</SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarGroup>
+
+            <SidebarGroup>
+            <SidebarGroupLabel>Tools</SidebarGroupLabel>
+            {menuItems.tools.map(({key, title}) => (
+              <SidebarMenuItem key={key}>
+                <SidebarMenuButton onClick={() => handleMenuClick(key)} isActive={activeCalculator === key}>{title}</SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarGroup>
+
+            <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => handleMenuClick('settings')} isActive={activeCalculator === 'settings'}><Settings /> Settings</SidebarMenuButton>
+          </SidebarMenuItem>
+
+        </SidebarMenu>
+      </SidebarContent>
+      <main className="flex-1 min-h-screen p-4 sm:p-6 md:p-8 bg-muted/40">
+        <header className="flex items-center justify-between md:justify-end mb-4">
+          <SidebarTrigger className="md:hidden" />
+            <h1 className="text-2xl font-bold text-primary md:hidden">Quick Calculator+</h1>
+            <div />
+        </header>
+        {renderActiveCalculator()}
+      </main>
+    </Sidebar>
+  );
+}
+
+export default function Home() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Splash screen timer
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (loading) {
     return <SplashScreen />;
   }
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => setActiveCalculator('home')} isActive={activeCalculator === 'home'}><Calculator /> Home</SidebarMenuButton>
-            </SidebarMenuItem>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Free</SidebarGroupLabel>
-              {menuItems.free.map(({key, title}) => (
-                <SidebarMenuItem key={key}>
-                  <SidebarMenuButton onClick={() => setActiveCalculator(key)} isActive={activeCalculator === key}>{title}</SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarGroup>
-
-             <SidebarGroup>
-              <SidebarGroupLabel>Advanced</SidebarGroupLabel>
-              {menuItems.advanced.map(({key, title}) => (
-                <SidebarMenuItem key={key}>
-                  <SidebarMenuButton onClick={() => setActiveCalculator(key)} isActive={activeCalculator === key}>{title}</SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarGroup>
-
-             <SidebarGroup>
-              <SidebarGroupLabel>Tools</SidebarGroupLabel>
-              {menuItems.tools.map(({key, title}) => (
-                <SidebarMenuItem key={key}>
-                  <SidebarMenuButton onClick={() => setActiveCalculator(key)} isActive={activeCalculator === key}>{title}</SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarGroup>
-
-             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => setActiveCalculator('settings')} isActive={activeCalculator === 'settings'}><Settings /> Settings</SidebarMenuButton>
-            </SidebarMenuItem>
-
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <main className="flex-1 min-h-screen p-4 sm:p-6 md:p-8 bg-muted/40">
-        <header className="flex items-center justify-between md:justify-end mb-4">
-          <SidebarTrigger className="md:hidden" />
-           <h1 className="text-2xl font-bold text-primary md:hidden">Quick Calculator+</h1>
-           <div />
-        </header>
-        {renderActiveCalculator()}
-      </main>
+      <HomePageContent />
     </SidebarProvider>
   );
 }
