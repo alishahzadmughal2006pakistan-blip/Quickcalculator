@@ -142,17 +142,14 @@ function HomePageContent() {
   };
   
   useEffect(() => {
-    const timer = setTimeout(() => {
-        try {
-            const storedHistory = localStorage.getItem('calculatorHistory');
-            if (storedHistory) {
-                setHistory(JSON.parse(storedHistory));
-            }
-        } catch (error) {
-            console.error("Failed to load from localStorage", error);
+    try {
+        const storedHistory = localStorage.getItem('calculatorHistory');
+        if (storedHistory) {
+            setHistory(JSON.parse(storedHistory));
         }
-    }, 2000);
-    return () => clearTimeout(timer);
+    } catch (error) {
+        console.error("Failed to load from localStorage", error);
+    }
   }, []);
 
   useEffect(() => {
