@@ -120,7 +120,7 @@ const PercentageCalculator = () => {
           </div>
         )}
         
-        <Button onClick={calculatePercentage} className="w-full h-12 text-lg font-bold" style={{ backgroundColor: '#F39C12' }}>
+        <Button onClick={calculatePercentage} className="w-full h-12 text-lg font-bold bg-[#F39C12] hover:bg-[#F39C12]/90 text-white">
             Calculate
         </Button>
       </CardContent>

@@ -94,7 +94,7 @@ const AgeCalculator = () => {
           </div>
         )}
         
-        <Button onClick={calculateAge} className="w-full h-12 text-lg font-bold" style={{ backgroundColor: '#8E44AD' }}>
+        <Button onClick={calculateAge} className="w-full h-12 text-lg font-bold bg-[#8E44AD] hover:bg-[#8E44AD]/90 text-white">
             Calculate Age
         </Button>
       </CardContent>
