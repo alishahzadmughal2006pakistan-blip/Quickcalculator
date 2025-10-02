@@ -223,9 +223,12 @@ const CurrencyConverter = () => {
   };
 
   useEffect(() => {
-    if(amount && fromCurrency && toCurrency) {
-        handleConvert();
+    const convert = async () => {
+        if(amount && fromCurrency && toCurrency) {
+            await handleConvert();
+        }
     }
+    convert().catch(console.error);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amount, fromCurrency, toCurrency]);
 
