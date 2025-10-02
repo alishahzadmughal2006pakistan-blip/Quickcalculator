@@ -207,7 +207,7 @@ const UnitConverter = () => {
             <Select value={toUnit} onValueChange={setToUnit}>
                 <SelectTrigger id="toUnit" className="w-full">
                     <SelectValue/>
-                </SelectTrigger>
+                </Trigger>
                 <SelectContent>
                     {Object.keys(units[category]).map(unit => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}
                 </SelectContent>
