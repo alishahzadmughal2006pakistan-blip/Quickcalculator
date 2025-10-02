@@ -15,12 +15,12 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4 font-body">
-      <Card className="w-full max-w-4xl shadow-2xl rounded-2xl bg-card">
+    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-2 sm:p-4 font-body">
+      <Card className="w-full max-w-4xl shadow-2xl rounded-2xl bg-card border-none sm:border">
         <CardHeader className="text-center">
           <CardTitle className="font-headline text-3xl font-bold tracking-tight text-primary">Quick Calculator+</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-6">
           <Tabs defaultValue="free" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="free"><Calculator className="w-4 h-4 mr-1" /> Free</TabsTrigger>
@@ -29,7 +29,7 @@ export default function Home() {
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="free" className="pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                 <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 <TipCalculator />
               </div>

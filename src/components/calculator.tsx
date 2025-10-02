@@ -106,13 +106,13 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     if(isClear) variant = 'outline';
 
     const iconMap: { [key: string]: React.ReactNode } = {
-        '/': <Divide size={28} />,
-        '*': <X size={28} />,
-        '-': <Minus size={28} />,
-        '+': <Plus size={28} />,
+        '/': <Divide size={24} />,
+        '*': <X size={24} />,
+        '-': <Minus size={24} />,
+        '+': <Plus size={24} />,
     };
     
-    let finalClassName = `h-20 text-3xl transition-transform active:scale-95 rounded-full ${className}`;
+    let finalClassName = `h-16 sm:h-20 text-2xl sm:text-3xl transition-transform active:scale-95 rounded-full ${className}`;
 
     return (
         <Button
@@ -154,16 +154,16 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
       <CardContent>
         <div className="flex flex-col gap-4">
           <div className="bg-muted text-right rounded-lg p-4 break-all">
-            <ScrollArea className="h-20 mb-2">
+            <ScrollArea className="h-16 sm:h-20 mb-2">
                 <div className="flex flex-col items-end gap-1 pr-2">
                   {history.slice(0, 5).reverse().map((item, index) => (
-                    <p key={index} className={`text-muted-foreground text-sm ${index === 4 ? 'font-bold' : ''}`}>
+                    <p key={index} className={`text-muted-foreground text-xs sm:text-sm ${index === 4 ? 'font-bold' : ''}`}>
                       {item}
                     </p>
                   ))}
                 </div>
             </ScrollArea>
-            <p className="text-6xl font-light text-foreground">{displayValue}</p>
+            <p className="text-5xl sm:text-6xl font-light text-foreground">{displayValue}</p>
           </div>
 
           <div className="grid grid-cols-4 gap-2">
