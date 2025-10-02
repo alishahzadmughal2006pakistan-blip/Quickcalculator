@@ -12,6 +12,7 @@ import DateCalculator from '@/components/date-calculator';
 import DiscountCalculator from '@/components/discount-calculator';
 import DataStorageConverter from '@/components/data-storage-converter';
 import BasicCalculator from '@/components/calculator';
+import LoanAffordabilityCalculator from '@/components/loan-affordability-calculator';
 import type { ComponentType } from 'react';
 
 export const allCalculators: { key: string, component: ComponentType<any>, title: string, category: string }[] = [
@@ -21,12 +22,13 @@ export const allCalculators: { key: string, component: ComponentType<any>, title
   { key: 'percentage', component: PercentageCalculator, title: "Percentage Calculator", category: 'free' },
   { key: 'age', component: AgeCalculator, title: "Age Calculator", category: 'free' },
   { key: 'unit', component: UnitConverter, title: "Unit Converter", category: 'tools' },
+  { key: 'date', component: DateCalculator, title: "Date Calculator", category: 'tools' },
+  { key: 'data', component: DataStorageConverter, title: "Data Storage Converter", category: 'tools' },
   { key: 'loan', component: LoanCalculator, title: "Loan/EMI Calculator", category: 'advanced' },
   { key: 'currency', component: CurrencyConverter, title: "Currency Converter", category: 'advanced' },
   { key: 'scientific', component: ScientificCalculator, title: "Scientific Calculator", category: 'advanced' },
   { key: 'tax', component: TaxCalculator, title: "Tax Calculator", category: 'advanced' },
   { key: 'investment', component: InvestmentReturnCalculator, title: "Investment Calculator", category: 'advanced' },
-  { key: 'date', component: DateCalculator, title: "Date Calculator", category: 'tools' },
+  { key: 'loan_affordability', component: LoanAffordabilityCalculator, title: "Loan Affordability AI", category: 'advanced' },
   { key: 'discount', component: DiscountCalculator, title: "Discount Calculator", category: 'free' },
-  { key: 'data', component: DataStorageConverter, title: "Data Storage Converter", category: 'tools' },
 ];

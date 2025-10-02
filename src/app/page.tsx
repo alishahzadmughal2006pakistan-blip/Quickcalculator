@@ -39,7 +39,7 @@ const SettingsScreen = () => {
     };
     
     return (
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md mx-auto animate-fade-in-scale">
             <CardHeader>
                 <CardTitle>Settings</CardTitle>
             </CardHeader>
@@ -74,15 +74,15 @@ const SettingsScreen = () => {
                 </div>
                 {!isPremium && (
                     <div className="border-t pt-4">
-                        <Card className="bg-primary/10 border-primary/20 text-center p-6 space-y-4">
+                        <Card className="bg-gradient-to-br from-primary to-accent border-primary/20 text-center p-6 space-y-4">
                              <div className="flex justify-center">
-                                <Gem className="w-12 h-12 text-primary" />
+                                <Gem className="w-12 h-12 text-primary-foreground" />
                             </div>
-                            <h3 className="text-xl font-bold">Go Premium!</h3>
-                            <p className="text-sm text-primary/80">Remove ads and unlock all advanced calculators permanently.</p>
+                            <h3 className="text-xl font-bold text-primary-foreground">Go Premium!</h3>
+                            <p className="text-sm text-primary-foreground/80">Remove ads and unlock all advanced calculators permanently.</p>
                             <Button 
                                 onClick={() => setPremium(true)}
-                                className="w-full"
+                                className="w-full bg-background text-foreground hover:bg-background/90"
                                 size="lg"
                             >
                                 Upgrade to Premium
@@ -142,7 +142,7 @@ function HomePageContent() {
         const pinned = allCalculators.filter(c => c.key !== 'home' && pinnedCalculators.includes(c.key));
 
         return (
-            <div className='space-y-4'>
+            <div className='space-y-4 animate-fade-in-scale'>
                 <div className="relative">
                     <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 </div>
@@ -151,12 +151,12 @@ function HomePageContent() {
                     pinned.map(calculator => {
                         const CalculatorComponent = calculator.component;
                         return (
-                            <div key={calculator.key} className="relative group">
+                            <div key={calculator.key} className="relative group animate-fade-in-scale">
                                 <CalculatorComponent />
                                 <Button 
                                     size="icon" 
                                     variant="ghost" 
-                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                     onClick={() => togglePinnedCalculator(calculator.key)}
                                 >
                                     <PinOff className='text-primary' />
@@ -185,7 +185,7 @@ function HomePageContent() {
       const isPinned = pinnedCalculators.includes(calculator.key);
 
       const mainContent = (
-         <div className="relative group">
+         <div className="relative group animate-fade-in-scale">
             <CalculatorComponent key={activeCalculator} />
             <Button 
                 size="icon" 
