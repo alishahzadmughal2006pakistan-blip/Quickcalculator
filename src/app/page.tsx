@@ -43,8 +43,10 @@ const SettingsScreen = () => {
     };
 
     const handleRestorePurchase = () => {
+        // TODO: GOOGLE PLAY BILLING INTEGRATION
         // In a real app, this would involve calling your app store's SDK
-        // e.g., call Google Play Billing library to check for existing purchases
+        // e.g., call Google Play Billing library to check for existing purchases.
+        // On success, you would then call setPremium(true).
         console.log("Simulating restore purchase...");
         setPremium(true);
         toast({
@@ -97,6 +99,7 @@ const SettingsScreen = () => {
                             <p className="text-sm text-primary-foreground/80">Remove ads and unlock all advanced calculators permanently.</p>
                             <Button 
                                 onClick={() => {
+                                    // TODO: GOOGLE PLAY BILLING INTEGRATION
                                     // In a real app, you would initiate the Google Play Billing flow here.
                                     // On success, you would then call setPremium(true).
                                     console.log("Simulating premium purchase...");

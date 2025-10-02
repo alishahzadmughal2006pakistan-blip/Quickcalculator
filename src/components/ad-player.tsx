@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -34,10 +35,16 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
             return;
         }
 
+        // TODO: GOOGLE ADMOB INTEGRATION
+        // This is where you would trigger the showing of a real AdMob rewarded video ad.
+        // You would typically have a callback for when the ad is completed by the user.
+        // The logic below simulates this with a timer.
+
         const countdownInterval = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
                     clearInterval(countdownInterval);
+                    // This is the "on complete" callback from the ad.
                     onComplete();
                     toast({
                         title: `${featureName} Unlocked!`,
@@ -77,6 +84,7 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
                 </DialogHeader>
                 
                 <div className="aspect-video bg-black text-white flex items-center justify-center rounded-lg my-4">
+                    {/* This div simulates the video player from the AdMob SDK */}
                     <p>Your ad is playing...</p>
                 </div>
 
