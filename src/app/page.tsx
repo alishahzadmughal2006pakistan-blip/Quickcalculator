@@ -26,6 +26,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import DateCalculator from '@/components/date-calculator';
+import DiscountCalculator from '@/components/discount-calculator';
+import DataStorageConverter from '@/components/data-storage-converter';
 
 const SplashScreen = () => (
   <div className="flex flex-col items-center justify-center h-screen w-screen bg-background animate-fade-in">
@@ -90,7 +93,11 @@ export default function Home() {
               </div>
             </TabsContent>
             <TabsContent value="tools" className="pt-4">
-               <p className="text-center text-muted-foreground">Tools coming soon!</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
+                <DateCalculator />
+                <DiscountCalculator />
+                <DataStorageConverter />
+              </div>
             </TabsContent>
             <TabsContent value="settings" className="pt-4">
                <Card className="w-full max-w-md mx-auto">
