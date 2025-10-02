@@ -98,21 +98,28 @@ const ScientificCalculator = () => {
       setExpression(newExpression);
       setDisplayValue(newExpression);
   }
+  
+  const handleSquare = () => {
+    setHasCalculated(false);
+    const newExpression = `(${expression})^2`;
+    setExpression(newExpression);
+    setDisplayValue(newExpression);
+  }
 
-  const renderButton = (key: string, className? : string, customClick?: () => void, customStyle?: React.CSSProperties) => {
+  const renderButton = (key: string, className? : string, customClick?: () => void) => {
     const isNumber = !isNaN(parseInt(key));
     const isDecimal = key === '.';
-    const isOperator = ['/', '*', '-', '+', '^'].includes(key);
-    const isFunction = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'].includes(key);
-    const isFactorial = key === 'x!';
+    const isOperator = ['/', '*', '-', '+'].includes(key);
+    const isFunction = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt', 'x²', '^', 'x!'].includes(key);
     const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
-    const isSquare = key === 'x²';
 
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' | 'ghost' = 'secondary';
-    if (isOperator || isEquals) variant = 'default';
-    if (isClear || isFunction || isParenthesis || isFactorial || isSquare) variant = 'outline';
+    if (isOperator) variant = 'default';
+    if (isEquals) variant = 'default';
+    if (isClear) variant = 'destructive';
+    if (isFunction || isParenthesis) variant = 'outline';
 
 
     const iconMap: { [key:string]: React.ReactNode } = {
@@ -131,14 +138,14 @@ const ScientificCalculator = () => {
         clickAction = () => inputDigit(key);
     } else if (isDecimal) {
         clickAction = inputDecimal;
-    } else if (isOperator) {
+    } else if (isOperator || key === '^') {
         clickAction = () => handleOperator(key);
-    } else if (isFunction) {
+    } else if (['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'].includes(key)) {
         clickAction = () => handleFunction(key);
     } else if (isFactorial) {
         clickAction = handleFactorial;
-    } else if (isSquare) {
-        clickAction = () => handleOperator('^2');
+    } else if (key === 'x²') {
+        clickAction = handleSquare;
     } else if (isParenthesis) {
         clickAction = () => handleParenthesis(key);
     } else if (isEquals) {
@@ -161,7 +168,7 @@ const ScientificCalculator = () => {
           key={key}
           variant={variant}
           className={`h-12 text-lg transition-transform active:scale-95 rounded-xl ${className}`}
-          style={customStyle}
+          style={isEquals ? { backgroundColor: '#4A90E2', color: 'white' } : {}}
           onClick={() => handleButtonClick(finalClickAction)}
         >
           {iconMap[key] || key}
@@ -178,40 +185,41 @@ const ScientificCalculator = () => {
         <ScrollArea className="h-20 bg-muted text-right rounded-lg p-3 break-all">
           <p className="text-3xl font-light text-foreground">{displayValue}</p>
         </ScrollArea>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-6 gap-2">
+            {/* Scientific Functions */}
             {renderButton('sin')}
             {renderButton('cos')}
-            {renderButton('tan')}
-            {renderButton('log')}
-            {renderButton('ln')}
-
+            {renderButton('C')}
             {renderButton('(')}
             {renderButton(')')}
-            {renderButton('x²')}
-            {renderButton('^')}
-            {renderButton('sqrt')}
-            
-            {renderButton('C')}
-            {renderButton('x!')}
+            {renderButton('/')}
+
+            {renderButton('tan')}
+            {renderButton('log')}
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
-            
-            {renderButton('/')}
             {renderButton('*')}
+            
+            {renderButton('ln')}
+            {renderButton('sqrt')}
             {renderButton('4')}
             {renderButton('5')}
             {renderButton('6')}
-
             {renderButton('-')}
-            {renderButton('+')}
+            
+            {renderButton('x²')}
+            {renderButton('^')}
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
-            
-            {renderButton('=', 'row-span-2 h-full')}
+            {renderButton('+')}
+
+            {renderButton('x!')}
+            {renderButton('π', '', () => inputDigit('3.14159'))}
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
+            {renderButton('=', '', handleEquals)}
         </div>
       </CardContent>
     </Card>
