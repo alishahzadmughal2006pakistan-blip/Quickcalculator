@@ -90,7 +90,7 @@ export const AppLayout = ({ children, activeCalculator, setActiveCalculator }: A
     return (
         <div className="flex min-h-screen bg-muted/40">
             <DesktopSidebar activeCalculator={activeCalculator} setActiveCalculator={setActiveCalculator} />
-            <main className="flex-1 pb-16 md:pb-0 p-4 sm:p-6 md:p-8">
+            <main className="flex-1 p-4 sm:p-6 md:p-8 pb-16 md:pb-0">
                 {children}
             </main>
             <BottomNavbar activeCalculator={activeCalculator} setActiveCalculator={setActiveCalculator} />

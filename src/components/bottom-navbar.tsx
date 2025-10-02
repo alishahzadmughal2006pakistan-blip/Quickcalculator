@@ -61,7 +61,7 @@ const MenuSheetContent = ({ category, setActiveCalculator, closeSheet }: { categ
 }
 
 export default function BottomNavbar({ activeCalculator, setActiveCalculator }: BottomNavbarProps) {
-  const [isSheetOpen, setSheetOpen] = useState(false);
+  const [openSheet, setOpenSheet] = useState<'free' | 'advanced' | 'tools' | null>(null);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t z-50 md:hidden">
@@ -70,15 +70,16 @@ export default function BottomNavbar({ activeCalculator, setActiveCalculator }: 
             const isActive = activeCalculator === item.key || (allCalculators.find(c => c.key === activeCalculator)?.category === item.key);
             
             if (item.key === 'free' || item.key === 'advanced' || item.key === 'tools') {
+                const categoryKey = item.key as 'free' | 'advanced' | 'tools';
                 return (
-                     <Sheet key={item.key} open={isSheetOpen} onOpenChange={setSheetOpen}>
+                     <Sheet key={item.key} open={openSheet === categoryKey} onOpenChange={(isOpen) => setOpenSheet(isOpen ? categoryKey : null)}>
                         <SheetTrigger asChild>
-                             <Button variant="ghost" className={cn("flex flex-col h-full w-full rounded-none", isActive && 'text-primary')}>
+                             <Button variant="ghost" className={cn("flex flex-col h-full w-full rounded-none flex-1", isActive && 'text-primary')}>
                                 {item.icon}
                                 <span className="text-xs">{item.label}</span>
                             </Button>
                         </SheetTrigger>
-                       <MenuSheetContent category={item.key as 'free' | 'advanced' | 'tools'} setActiveCalculator={setActiveCalculator} closeSheet={() => setSheetOpen(false)} />
+                       <MenuSheetContent category={categoryKey} setActiveCalculator={setActiveCalculator} closeSheet={() => setOpenSheet(null)} />
                     </Sheet>
                 )
             }
@@ -87,7 +88,7 @@ export default function BottomNavbar({ activeCalculator, setActiveCalculator }: 
                 <Button
                     key={item.key}
                     variant="ghost"
-                    className={cn("flex flex-col h-full w-full rounded-none", isActive && 'text-primary')}
+                    className={cn("flex flex-col h-full w-full rounded-none flex-1", isActive && 'text-primary')}
                     onClick={() => setActiveCalculator(item.key)}
                 >
                     {item.icon}
