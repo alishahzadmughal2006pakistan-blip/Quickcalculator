@@ -101,10 +101,13 @@ const ScientificCalculator = () => {
     const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
+    const isPlaceholder = key.startsWith('placeholder');
 
-    let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
+    let variant: 'default' | 'secondary' | 'outline' | 'destructive' | 'ghost' = 'secondary';
     if (isOperator || isEquals) variant = 'default';
     if (isClear || isFunction || isParenthesis || isFactorial) variant = 'outline';
+    if (isPlaceholder) variant = 'ghost';
+
 
     const iconMap: { [key:string]: React.ReactNode } = {
         '/': <Divide size={20} />,
@@ -120,6 +123,7 @@ const ScientificCalculator = () => {
           variant={variant}
           className={`h-12 text-lg transition-transform active:scale-95 rounded-xl ${className}`}
           onClick={() => {
+            if (isPlaceholder) return;
             if (displayValue === "Error" && !isClear) {
               resetCalculator();
               return;
@@ -144,8 +148,9 @@ const ScientificCalculator = () => {
                 resetCalculator();
             }
           }}
+          disabled={isPlaceholder}
         >
-          {iconMap[key] || key}
+          {isPlaceholder ? '' : (iconMap[key] || key)}
         </Button>
     )
   }
@@ -182,13 +187,13 @@ const ScientificCalculator = () => {
             {renderButton('5')}
             {renderButton('6')}
             {renderButton('*')}
-            {renderButton(' ')} 
+            {renderButton('placeholder-1')} 
             
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
             {renderButton('-')}
-            {renderButton(' ')}
+            {renderButton('placeholder-2')}
 
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
