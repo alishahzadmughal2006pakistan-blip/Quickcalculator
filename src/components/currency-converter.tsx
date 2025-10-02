@@ -22,6 +22,7 @@ const CurrencyConverter = () => {
 
   useEffect(() => {
     const fetchCurrencies = async () => {
+      setIsFetchingCurrencies(true);
       try {
         const res = await fetch('https://api.exchangerate.host/symbols');
         if (!res.ok) {
@@ -36,8 +37,8 @@ const CurrencyConverter = () => {
         console.error(error);
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'Could not load the list of currencies. Please try again later.',
+          title: 'Error Loading Currencies',
+          description: 'Could not load the list of available currencies. Please try again later.',
         });
       } finally {
         setIsFetchingCurrencies(false);
@@ -119,15 +120,15 @@ const CurrencyConverter = () => {
                 <SelectValue placeholder={isFetchingCurrencies ? "Loading..." : "From"} />
               </SelectTrigger>
               <SelectContent>
-                {currencyOptions.length > 0 ? (
-                    currencyOptions.map(({code, description}) => <SelectItem key={code} value={code}>{code} - {description}</SelectItem>)
-                ) : (
+                {isFetchingCurrencies ? (
                     <SelectItem value="loading" disabled>Loading currencies...</SelectItem>
+                ) : (
+                    currencyOptions.map(({code, description}) => <SelectItem key={code} value={code}>{code} - {description}</SelectItem>)
                 )}
               </SelectContent>
             </Select>
           </div>
-          <Button variant="ghost" size="icon" className="mt-8" onClick={handleSwap}>
+          <Button variant="ghost" size="icon" className="mt-8" onClick={handleSwap} disabled={isFetchingCurrencies}>
             <ArrowRightLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1 space-y-2">
@@ -137,10 +138,10 @@ const CurrencyConverter = () => {
                 <SelectValue placeholder={isFetchingCurrencies ? "Loading..." : "To"} />
               </SelectTrigger>
               <SelectContent>
-                {currencyOptions.length > 0 ? (
-                    currencyOptions.map(({code, description}) => <SelectItem key={code} value={code}>{code} - {description}</SelectItem>)
-                ) : (
+                {isFetchingCurrencies ? (
                     <SelectItem value="loading" disabled>Loading currencies...</SelectItem>
+                ) : (
+                    currencyOptions.map(({code, description}) => <SelectItem key={code} value={code}>{code} - {description}</SelectItem>)
                 )}
               </SelectContent>
             </Select>
