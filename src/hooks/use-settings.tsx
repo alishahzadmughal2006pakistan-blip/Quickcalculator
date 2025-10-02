@@ -44,16 +44,22 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
             if (soundStatus) setSoundEnabled(JSON.parse(soundStatus));
             if (pinned) {
                 const parsedPinned = JSON.parse(pinned);
-                if (!parsedPinned.includes('home')) {
-                    parsedPinned.unshift('home');
+                if (Array.isArray(parsedPinned)) {
+                    if (!parsedPinned.includes('home')) {
+                        parsedPinned.unshift('home');
+                    }
+                    setPinnedCalculators(parsedPinned);
+                } else {
+                    setPinnedCalculators(['home']);
                 }
-                setPinnedCalculators(parsedPinned);
             } else {
                  setPinnedCalculators(['home']);
             }
 
         } catch (error) {
             console.error("Failed to load settings from localStorage", error);
+            // Reset to defaults on error
+            setPinnedCalculators(['home']);
         }
         setIsLoaded(true);
     }, []);
