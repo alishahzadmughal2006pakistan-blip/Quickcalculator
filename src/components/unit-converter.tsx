@@ -144,30 +144,32 @@ const UnitConverter = () => {
         <CardTitle className="text-xl font-bold text-center">Unit Converter</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className='space-y-2'>
-            <Label htmlFor='ai-query'>Ask AI to Convert</Label>
-            <div className="flex gap-2">
-                <Input 
-                    id="ai-query" 
-                    placeholder='e.g. "2 miles to km"' 
-                    value={aiQuery}
-                    onChange={(e) => setAiQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAiConvert()}
-                />
-                <Button onClick={handleAiConvert} disabled={isPending} className="bg-purple-600 hover:bg-purple-700">
-                    {isPending ? <Loader className="animate-spin" /> : <Wand2 />}
-                </Button>
+        <div>
+            <div className='space-y-2'>
+                <Label htmlFor='ai-query'>Ask AI to Convert</Label>
+                <div className="flex gap-2">
+                    <Input 
+                        id="ai-query" 
+                        placeholder='e.g. "2 miles to km"' 
+                        value={aiQuery}
+                        onChange={(e) => setAiQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAiConvert()}
+                    />
+                    <Button onClick={handleAiConvert} disabled={isPending} className="bg-purple-600 hover:bg-purple-700">
+                        {isPending ? <Loader className="animate-spin" /> : <Wand2 />}
+                    </Button>
+                </div>
             </div>
-        </div>
 
-        {aiResult && (
-             <div className="text-center space-y-2 pt-2">
-                <p className="text-muted-foreground">AI Result</p>
-                <p className="text-2xl font-bold text-purple-600 break-all">
-                {aiResult}
-                </p>
-            </div>
-        )}
+            {aiResult && (
+                 <div className="text-center space-y-2 pt-4">
+                    <p className="text-muted-foreground">AI Result</p>
+                    <p className="text-2xl font-bold text-purple-600 break-all">
+                    {aiResult}
+                    </p>
+                </div>
+            )}
+        </div>
 
         <Separator />
 
