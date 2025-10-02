@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
+import { generateBmiSuggestion } from '@/ai/flows/bmi-suggestion-flow';
+import { Loader } from 'lucide-react';
 
 const BmiCalculator = () => {
   const [weight, setWeight] = useState('');
@@ -17,6 +19,7 @@ const BmiCalculator = () => {
   const [bmiCategory, setBmiCategory] = useState('');
   const [categoryColor, setCategoryColor] = useState('');
   const [suggestion, setSuggestion] = useState('');
+  const [isPending, startTransition] = useTransition();
 
   const calculateBmi = () => {
     const weightNum = parseFloat(weight);
@@ -38,27 +41,47 @@ const BmiCalculator = () => {
     const bmiValue = weightInKg / (heightInM * heightInM);
     setBmi(bmiValue);
 
+    let category = '';
+    let color = '';
+
     if (bmiValue < 18.5) {
-      setBmiCategory('Underweight');
-      setCategoryColor('text-yellow-500');
-      setSuggestion('You might want to gain some weight.');
+      category = 'Underweight';
+      color = 'text-yellow-500';
     } else if (bmiValue >= 18.5 && bmiValue < 25) {
-      setBmiCategory('Normal');
-      setCategoryColor('text-green-500');
-      setSuggestion('You are healthy. Keep it up!');
+      category = 'Normal';
+      color = 'text-green-500';
     } else if (bmiValue >= 25 && bmiValue < 30) {
-      setBmiCategory('Overweight');
-      setCategoryColor('text-yellow-500');
-      setSuggestion('You might want to consider losing some weight.');
+      category = 'Overweight';
+      color = 'text-yellow-500';
     } else {
-      setBmiCategory('Obese');
-      setCategoryColor('text-red-500');
-      setSuggestion('It is recommended to consult a doctor.');
+      category = 'Obese';
+      color = 'text-red-500';
     }
+    setBmiCategory(category);
+    setCategoryColor(color);
+
+    startTransition(async () => {
+        try {
+            const result = await generateBmiSuggestion({ bmi: bmiValue, category: category });
+            setSuggestion(result.suggestion);
+        } catch (e) {
+            console.error(e);
+            setSuggestion('Could not generate a suggestion at this time.');
+        }
+    });
   };
 
   useEffect(() => {
-    calculateBmi();
+    // This effect will run when the user stops typing for 500ms
+    const handler = setTimeout(() => {
+        if(weight && height) {
+            calculateBmi();
+        }
+    }, 500);
+
+    return () => {
+        clearTimeout(handler);
+    };
   }, [weight, height, weightUnit, heightUnit]);
 
   return (
@@ -95,7 +118,9 @@ const BmiCalculator = () => {
             <p className={cn("font-semibold", categoryColor)}>
               {bmiCategory}
             </p>
-            <p className="text-sm text-muted-foreground">{suggestion}</p>
+            <div className="text-sm text-muted-foreground min-h-[40px] flex items-center justify-center px-4">
+              {isPending ? <Loader className="animate-spin" /> : <p>{suggestion}</p>}
+            </div>
           </div>
         )}
         
