@@ -44,6 +44,8 @@ const SettingsScreen = () => {
 
     const handleRestorePurchase = () => {
         // In a real app, this would involve calling your app store's SDK
+        // e.g., call Google Play Billing library to check for existing purchases
+        console.log("Simulating restore purchase...");
         setPremium(true);
         toast({
             title: "Purchase Restored",
@@ -94,11 +96,16 @@ const SettingsScreen = () => {
                             <h3 className="text-xl font-bold text-primary-foreground">Go Premium!</h3>
                             <p className="text-sm text-primary-foreground/80">Remove ads and unlock all advanced calculators permanently.</p>
                             <Button 
-                                onClick={() => setPremium(true)}
+                                onClick={() => {
+                                    // In a real app, you would initiate the Google Play Billing flow here.
+                                    // On success, you would then call setPremium(true).
+                                    console.log("Simulating premium purchase...");
+                                    setPremium(true);
+                                }}
                                 className="w-full bg-background text-foreground hover:bg-background/90"
                                 size="lg"
                             >
-                                Upgrade Now for $4.99
+                                Upgrade Now for $1.99
                             </Button>
                         </Card>
                         <Button 
