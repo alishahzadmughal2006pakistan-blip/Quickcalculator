@@ -31,7 +31,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     const [isPremium, setIsPremium] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [unlockedFeatures, setUnlockedFeatures] = useState<string[]>([]);
-    const [pinnedCalculators, setPinnedCalculators] = useState<string[]>(['home']); // 'home' is always pinned
+    const [pinnedCalculators, setPinnedCalculators] = useState<string[]>(['home']);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
@@ -44,7 +44,6 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
             if (soundStatus) setSoundEnabled(JSON.parse(soundStatus));
             if (pinned) {
                 const parsedPinned = JSON.parse(pinned);
-                // Ensure 'home' is always present
                 if (!parsedPinned.includes('home')) {
                     parsedPinned.unshift('home');
                 }
@@ -85,7 +84,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     }
     
     const togglePinnedCalculator = (calculatorKey: string) => {
-        if (calculatorKey === 'home') return; // Cannot unpin home
+        if (calculatorKey === 'home') return;
         
         try {
             let newPinned: string[];
@@ -112,9 +111,13 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
         togglePinnedCalculator
     };
 
+    if (!isLoaded) {
+        return null;
+    }
+
     return (
         <SettingsContext.Provider value={value}>
-            {isLoaded ? children : null}
+            {children}
         </SettingsContext.Provider>
     );
 }
