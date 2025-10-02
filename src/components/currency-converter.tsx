@@ -24,7 +24,6 @@ const CurrencyConverter = () => {
     const fetchCurrencies = async () => {
       setIsFetchingCurrencies(true);
       try {
-        // Fetch currency list from a reliable source
         const res = await fetch('https://api.frankfurter.app/currencies');
         if (!res.ok) {
           throw new Error('Could not fetch currency list');
@@ -63,24 +62,26 @@ const CurrencyConverter = () => {
     setExchangeRate(null);
 
     try {
-      // Use open.er-api.com for conversion rates
-      const res = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
+      const res = await fetch(`https://api.frankfurter.app/latest?amount=${numAmount}&from=${fromCurrency}&to=${toCurrency}`);
       if (!res.ok) {
         throw new Error('Failed to fetch rates');
       }
       const data = await res.json();
-      if(data.result === 'error') {
-        throw new Error(data['error-type'] || 'Failed to fetch rates');
-      }
-
       const rate = data.rates[toCurrency];
       if (!rate) {
           throw new Error('Conversion rate not available for the selected currency pair.');
       }
       
-      const convertedAmount = numAmount * rate;
+      const convertedAmount = rate;
       setResult(convertedAmount.toFixed(2));
-      setExchangeRate(`1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`);
+      
+      // Fetch the inverse rate for the exchange rate display
+      const rateRes = await fetch(`https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`);
+       if (!rateRes.ok) {
+        throw new Error('Failed to fetch individual rate');
+      }
+      const rateData = await rateRes.json();
+      setExchangeRate(`1 ${fromCurrency} = ${rateData.rates[toCurrency]} ${toCurrency}`);
 
     } catch (error: any) {
       console.error(error);
