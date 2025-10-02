@@ -49,13 +49,13 @@ const BmiCalculator = () => {
       color = 'text-yellow-500';
     } else if (bmiValue >= 18.5 && bmiValue < 25) {
       category = 'Normal';
-      color = 'text-green-500';
+      color = 'text-primary';
     } else if (bmiValue >= 25 && bmiValue < 30) {
       category = 'Overweight';
       color = 'text-yellow-500';
     } else {
       category = 'Obese';
-      color = 'text-red-500';
+      color = 'text-destructive';
     }
     setBmiCategory(category);
     setCategoryColor(color);
