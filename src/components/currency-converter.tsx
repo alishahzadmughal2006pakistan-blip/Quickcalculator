@@ -185,7 +185,7 @@ const CurrencyConverter = () => {
 
   const handleConvert = async () => {
     const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || !amount) {
+    if (isNaN(numAmount) || !amount || !fromCurrency || !toCurrency) {
       setResult(null);
       setExchangeRate(null);
       return;
@@ -221,15 +221,18 @@ const CurrencyConverter = () => {
       setIsLoading(false);
     }
   };
-
+  
   useEffect(() => {
-    const convert = async () => {
+    const handler = setTimeout(() => {
         if(amount && fromCurrency && toCurrency) {
-            await handleConvert();
+            handleConvert();
         }
-    }
-    convert().catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, 500);
+
+    return () => {
+        clearTimeout(handler);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amount, fromCurrency, toCurrency]);
 
 
