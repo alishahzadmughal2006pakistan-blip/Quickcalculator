@@ -10,6 +10,7 @@ import PercentageCalculator from '@/components/percentage-calculator';
 import AgeCalculator from '@/components/age-calculator';
 import UnitConverter from '@/components/unit-converter';
 import LoanCalculator from '@/components/loan-calculator';
+import CurrencyConverter from '@/components/currency-converter';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -72,22 +73,19 @@ export default function Home() {
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="free" className="pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-                  <div className="lg:col-span-1">
-                    <BasicCalculator addToHistory={handleAddToHistory} history={history} />
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:col-span-2">
-                      <TipCalculator />
-                      <BmiCalculator />
-                      <PercentageCalculator />
-                      <AgeCalculator />
-                      <UnitConverter />
-                  </div>
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+                  <BasicCalculator addToHistory={handleAddToHistory} history={history} />
+                  <TipCalculator />
+                  <BmiCalculator />
+                  <PercentageCalculator />
+                  <AgeCalculator />
+                  <UnitConverter />
               </div>
             </TabsContent>
             <TabsContent value="advanced" className="pt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
                 <LoanCalculator />
+                <CurrencyConverter />
               </div>
             </TabsContent>
             <TabsContent value="tools" className="pt-4">
