@@ -101,12 +101,10 @@ const ScientificCalculator = () => {
     const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
-    const isPlaceholder = key.startsWith('placeholder');
 
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' | 'ghost' = 'secondary';
     if (isOperator || isEquals) variant = 'default';
     if (isClear || isFunction || isParenthesis || isFactorial) variant = 'outline';
-    if (isPlaceholder) variant = 'ghost';
 
 
     const iconMap: { [key:string]: React.ReactNode } = {
@@ -124,7 +122,6 @@ const ScientificCalculator = () => {
           className={`h-12 text-lg transition-transform active:scale-95 rounded-xl ${className}`}
           style={customStyle}
           onClick={() => {
-            if (isPlaceholder) return;
             if (displayValue === "Error" && !isClear) {
               resetCalculator();
               return;
@@ -149,9 +146,8 @@ const ScientificCalculator = () => {
                 resetCalculator();
             }
           }}
-          disabled={isPlaceholder}
         >
-          {isPlaceholder ? '' : (iconMap[key] || key)}
+          {iconMap[key] || key}
         </Button>
     )
   }
@@ -178,7 +174,7 @@ const ScientificCalculator = () => {
             {renderButton('sqrt')}
             {renderButton('!')}
 
-            {renderButton('C', '', resetCalculator)}
+            {renderButton('C', 'col-span-2', resetCalculator)}
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
@@ -188,13 +184,11 @@ const ScientificCalculator = () => {
             {renderButton('5')}
             {renderButton('6')}
             {renderButton('*')}
-            {renderButton('placeholder-1')} 
             
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
             {renderButton('-')}
-            {renderButton('placeholder-2')}
 
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}

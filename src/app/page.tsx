@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Atom, Pin, PinOff, Settings, Trash2 } from 'lucide-react';
+import { Atom, Gem, Pin, PinOff, Trash2 } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { AppLayout } from '@/components/layout';
 import { allCalculators } from '@/lib/calculators';
@@ -24,15 +23,7 @@ import { useSettings, SettingsProvider } from '@/hooks/use-settings';
 import { FeatureLock } from '@/components/feature-lock';
 import { Switch } from '@/components/ui/switch';
 import { BannerAd } from '@/components/banner-ad';
-
-const SplashScreen = () => (
-  <div className="flex flex-col items-center justify-center h-screen w-screen bg-background animate-fade-in">
-    <div className="flex items-center space-x-4">
-      <Atom className="w-16 h-16 text-primary" />
-      <h1 className="text-5xl font-bold text-primary">Quick Calculator+</h1>
-    </div>
-  </div>
-);
+import SplashScreen from '@/components/splash-screen';
 
 const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
@@ -40,8 +31,6 @@ const SettingsScreen = () => {
     const handleClearHistory = () => {
         try {
             localStorage.removeItem('calculatorHistory');
-            // This is a bit of a hack, but it's the easiest way to get the
-            // history to update in the basic calculator component.
             window.location.reload();
         } catch (error) {
             console.error("Failed to clear history from localStorage", error);
@@ -82,18 +71,36 @@ const SettingsScreen = () => {
                     </AlertDialogContent>
                     </AlertDialog>
                 </div>
-                <div className="border-t pt-4">
-                     <div className="flex flex-col items-center space-y-2">
-                        <Label>{isPremium ? "You are a Premium User!" : "Remove Ads & Unlock All Features"}</Label>
-                        <Button 
-                            onClick={() => setPremium(!isPremium)}
-                            className="w-full"
-                            variant={isPremium ? 'outline' : 'default'}
+                {!isPremium && (
+                    <div className="border-t pt-4">
+                        <Card className="bg-primary/10 border-primary/20 text-center p-6 space-y-4">
+                             <div className="flex justify-center">
+                                <Gem className="w-12 h-12 text-primary" />
+                            </div>
+                            <h3 className="text-xl font-bold">Go Premium!</h3>
+                            <p className="text-sm text-primary/80">Remove ads and unlock all advanced calculators permanently.</p>
+                            <Button 
+                                onClick={() => setPremium(true)}
+                                className="w-full"
+                                size="lg"
                             >
-                           {isPremium ? "Revert to Free Version" : "Upgrade to Premium"}
+                                Upgrade to Premium
+                            </Button>
+                        </Card>
+                    </div>
+                )}
+                 {isPremium && (
+                    <div className="border-t pt-4 text-center space-y-2">
+                        <p className="font-semibold text-primary">You are a Premium user!</p>
+                         <Button 
+                            onClick={() => setPremium(false)}
+                            className="w-full"
+                            variant='outline'
+                            >
+                           Revert to Free Version
                         </Button>
                     </div>
-                </div>
+                )}
             </CardContent>
         </Card>
     );
@@ -139,23 +146,28 @@ function HomePageContent() {
                     <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 </div>
                 
-                {pinned.map(calculator => {
-                    const CalculatorComponent = calculator.component;
-                     const isPinned = pinnedCalculators.includes(calculator.key);
-                    return (
-                        <div key={calculator.key} className="relative">
-                            <CalculatorComponent />
-                             <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                className="absolute top-2 right-2"
-                                onClick={() => togglePinnedCalculator(calculator.key)}
-                            >
-                                {isPinned ? <PinOff className='text-primary' /> : <Pin />}
-                            </Button>
-                        </div>
-                    );
-                })}
+                {pinned.length > 0 ? (
+                    pinned.map(calculator => {
+                        const CalculatorComponent = calculator.component;
+                        return (
+                            <div key={calculator.key} className="relative group">
+                                <CalculatorComponent />
+                                <Button 
+                                    size="icon" 
+                                    variant="ghost" 
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => togglePinnedCalculator(calculator.key)}
+                                >
+                                    <PinOff className='text-primary' />
+                                </Button>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <Card className="text-center p-8 border-dashed">
+                        <p className="text-muted-foreground">Pin your favorite calculators from the menu to see them here for quick access!</p>
+                    </Card>
+                )}
             </div>
         )
     }
@@ -172,12 +184,12 @@ function HomePageContent() {
       const isPinned = pinnedCalculators.includes(calculator.key);
 
       const mainContent = (
-         <div className="relative">
+         <div className="relative group">
             <CalculatorComponent key={activeCalculator} />
             <Button 
                 size="icon" 
                 variant="ghost" 
-                className="absolute top-2 right-2 z-10"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 onClick={() => togglePinnedCalculator(calculator.key)}
             >
                 {isPinned ? <PinOff className='text-primary' /> : <Pin />}
@@ -213,8 +225,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Splash screen timer
-    const timer = setTimeout(() => setLoading(false), 2000);
+    const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 

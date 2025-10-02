@@ -118,11 +118,11 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
           description: "Could not share the result at this time.",
         })
       }
-    } else if (!navigator.share) {
-       toast({
-          variant: "destructive",
-          title: "Not supported",
-          description: "Your browser does not support the Web Share API.",
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(lastCalculation || '');
+        toast({
+          title: "Result Copied!",
+          description: "The calculation has been copied to your clipboard.",
         })
     }
   };
@@ -219,7 +219,7 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
             <ScrollArea className="h-16 sm:h-20 mb-2">
                 <div className="flex flex-col items-end gap-1 pr-2">
                   {history.slice(0, 5).reverse().map((item, index) => (
-                    <p key={index} className={`text-muted-foreground text-xs ${index === 0 ? 'font-bold' : ''}`}>
+                    <p key={index} className={`text-muted-foreground text-xs ${index === 0 ? 'font-bold opacity-100' : 'opacity-70'}`}>
                       {item}
                     </p>
                   ))}
@@ -275,5 +275,3 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
 };
 
 export default BasicCalculator;
-
-    

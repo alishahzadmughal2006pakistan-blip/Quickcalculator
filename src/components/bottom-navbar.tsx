@@ -65,7 +65,7 @@ export default function BottomNavbar({ activeCalculator, setActiveCalculator }: 
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t z-50 md:hidden">
-      <div className="grid grid-cols-5 items-center h-full">
+      <div className="grid h-full grid-cols-5">
         {navItems.map(item => {
             const isActive = activeCalculator === item.key || (allCalculators.find(c => c.key === activeCalculator)?.category === item.key);
             
@@ -74,9 +74,9 @@ export default function BottomNavbar({ activeCalculator, setActiveCalculator }: 
                 return (
                      <Sheet key={item.key} open={openSheet === categoryKey} onOpenChange={(isOpen) => setOpenSheet(isOpen ? categoryKey : null)}>
                         <SheetTrigger asChild>
-                             <Button variant="ghost" className={cn("flex flex-col h-full w-full rounded-none items-center justify-center", isActive && 'text-primary')}>
+                             <Button variant="ghost" className={cn("flex flex-col h-full w-full rounded-none items-center justify-center text-xs", isActive && 'text-primary')}>
                                 {item.icon}
-                                <span className="text-xs">{item.label}</span>
+                                <span>{item.label}</span>
                             </Button>
                         </SheetTrigger>
                        <MenuSheetContent category={categoryKey} setActiveCalculator={setActiveCalculator} closeSheet={() => setOpenSheet(null)} />
@@ -88,11 +88,11 @@ export default function BottomNavbar({ activeCalculator, setActiveCalculator }: 
                 <Button
                     key={item.key}
                     variant="ghost"
-                    className={cn("flex flex-col h-full w-full rounded-none items-center justify-center", isActive && 'text-primary')}
+                    className={cn("flex flex-col h-full w-full rounded-none items-center justify-center text-xs", isActive && 'text-primary')}
                     onClick={() => setActiveCalculator(item.key)}
                 >
                     {item.icon}
-                    <span className="text-xs">{item.label}</span>
+                    <span>{item.label}</span>
                 </Button>
             )
         })}
