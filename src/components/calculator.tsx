@@ -94,8 +94,12 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
       }
     }
   };
+
+  const toggleSign = () => {
+    setDisplayValue(String(parseFloat(displayValue) * -1));
+  };
   
-  const renderButton = (key: string, className? : string) => {
+  const renderButton = (key: string, className? : string, customClick?: () => void) => {
     const isNumber = !isNaN(parseInt(key)) || key === '.';
     const isOperator = ['/', '*', '-', '+'].includes(key);
     const isEquals = key === '=';
@@ -103,7 +107,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
     if(isOperator || isEquals) variant = 'default';
-    if(isClear) variant = 'outline';
+    if(isClear || key === '+/-' || key === '%') variant = 'outline';
 
     const iconMap: { [key: string]: React.ReactNode } = {
         '/': <Divide size={24} />,
@@ -121,6 +125,10 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
           size="lg"
           className={finalClassName}
           onClick={() => {
+            if(customClick) {
+              customClick();
+              return;
+            }
             if (displayValue === "Error") {
               resetCalculator();
               if(!isClear) {
@@ -147,7 +155,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   }
 
   return (
-    <Card className="w-full shadow-lg rounded-2xl">
+    <Card className="w-full shadow-lg rounded-2xl h-full">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-center">Basic Calculator</CardTitle>
       </CardHeader>
@@ -168,8 +176,8 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
 
           <div className="grid grid-cols-4 gap-2">
             {renderButton('C')}
-            {renderButton('()', 'hidden')}
-            {renderButton('%', 'hidden')}
+            {renderButton('+/-', '', toggleSign)}
+            {renderButton('%', '', () => setDisplayValue(String(parseFloat(displayValue) / 100)))}
             {renderButton('/')}
 
             {renderButton('7')}
