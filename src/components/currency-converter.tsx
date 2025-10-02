@@ -129,7 +129,7 @@ const CurrencyConverter = () => {
           </div>
         )}
 
-        <Button onClick={handleConvert} className="w-full h-12 text-lg font-bold" disabled={isLoading}>
+        <Button onClick={handleConvert} className="w-full h-12 text-lg font-bold" disabled={isLoading} style={{ backgroundColor: '#2980B9', color: 'white' }}>
           {isLoading ? <Loader className="animate-spin" /> : 'Convert'}
         </Button>
       </CardContent>

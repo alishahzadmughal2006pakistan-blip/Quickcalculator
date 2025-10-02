@@ -92,7 +92,7 @@ const ScientificCalculator = () => {
       setDisplayValue(newExpression);
   }
 
-  const renderButton = (key: string, className? : string, customClick?: () => void) => {
+  const renderButton = (key: string, className? : string, customClick?: () => void, customStyle?: React.CSSProperties) => {
     const isNumber = !isNaN(parseInt(key));
     const isDecimal = key === '.';
     const isOperator = ['/', '*', '-', '+', '^'].includes(key);
@@ -122,6 +122,7 @@ const ScientificCalculator = () => {
           key={key}
           variant={variant}
           className={`h-12 text-lg transition-transform active:scale-95 rounded-xl ${className}`}
+          style={customStyle}
           onClick={() => {
             if (isPlaceholder) return;
             if (displayValue === "Error" && !isClear) {
@@ -197,7 +198,7 @@ const ScientificCalculator = () => {
 
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
-            {renderButton('=', '', handleEquals)}
+            {renderButton('=', '', handleEquals, { backgroundColor: '#34495E', color: 'white' })}
             {renderButton('+', '', () => handleOperator('+'))}
         </div>
       </CardContent>

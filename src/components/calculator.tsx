@@ -132,7 +132,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     setDisplayValue(newExpression);
   }
 
-  const renderButton = (key: string, className? : string, customClick?: () => void) => {
+  const renderButton = (key: string, className? : string, customClick?: () => void, customStyle?: React.CSSProperties) => {
     const isNumber = !isNaN(parseInt(key));
     const isDecimal = key === '.';
     const isBinaryOperator = ['/', '*', '-', '+', '^'].includes(key);
@@ -143,7 +143,12 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     const isClear = key === 'C';
     
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
-    if(isBinaryOperator || isEquals) variant = 'default';
+    let style = customStyle;
+    if(isBinaryOperator) variant = 'default';
+    if(isEquals) {
+      variant = 'default';
+      style = { backgroundColor: '#4A90E2', color: 'white', ...customStyle };
+    }
     if(isClear || isUnaryOperator || isParenthesis || isSquare) variant = 'outline';
 
     const iconMap: { [key:string]: React.ReactNode } = {
@@ -161,6 +166,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
           variant={variant}
           size="lg"
           className={finalClassName}
+          style={style}
           onClick={() => {
             if (displayValue === "Error" && !isClear) {
               resetCalculator();

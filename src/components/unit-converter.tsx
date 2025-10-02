@@ -228,7 +228,7 @@ const UnitConverter = () => {
           </div>
         )}
         
-        <Button onClick={convert} className="w-full h-12 text-lg font-bold">
+        <Button onClick={convert} className="w-full h-12 text-lg font-bold" style={{ backgroundColor: '#1ABC9C', color: 'white' }}>
             Convert
         </Button>
       </CardContent>

@@ -49,7 +49,7 @@ const BmiCalculator = () => {
       color = 'text-yellow-500';
     } else if (bmiValue >= 18.5 && bmiValue < 25) {
       category = 'Normal';
-      color = 'text-primary';
+      color = 'text-green-500';
     } else if (bmiValue >= 25 && bmiValue < 30) {
       category = 'Overweight';
       color = 'text-yellow-500';
@@ -124,7 +124,7 @@ const BmiCalculator = () => {
           </div>
         )}
         
-        <Button onClick={calculateBmi} className="w-full h-12 text-lg font-bold">
+        <Button onClick={calculateBmi} className="w-full h-12 text-lg font-bold" style={{ backgroundColor: '#4A90E2', color: 'white' }}>
             Calculate
         </Button>
       </CardContent>

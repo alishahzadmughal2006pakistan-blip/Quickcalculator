@@ -111,7 +111,7 @@ const TipCalculator = () => {
           </div>
         </div>
         
-        <Button onClick={calculateTip} className="w-full h-12 text-lg font-bold">
+        <Button onClick={calculateTip} className="w-full h-12 text-lg font-bold" style={{ backgroundColor: '#27AE60', color: 'white' }}>
             Recalculate
         </Button>
       </CardContent>

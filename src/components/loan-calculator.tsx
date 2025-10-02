@@ -106,7 +106,7 @@ const LoanCalculator = () => {
           </div>
         )}
         
-        <Button onClick={calculateLoan} className="w-full h-12 text-lg font-bold">
+        <Button onClick={calculateLoan} className="w-full h-12 text-lg font-bold" style={{ backgroundColor: '#E74C3C', color: 'white' }}>
             Calculate
         </Button>
       </CardContent>
