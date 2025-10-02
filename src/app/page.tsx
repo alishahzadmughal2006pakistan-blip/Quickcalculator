@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Atom, Gem, Pin, PinOff, Trash2 } from 'lucide-react';
+import { Gem, Pin, PinOff, Trash2 } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { AppLayout } from '@/components/layout';
 import { allCalculators } from '@/lib/calculators';
