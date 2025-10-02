@@ -9,6 +9,8 @@ import BmiCalculator from '@/components/bmi-calculator';
 import PercentageCalculator from '@/components/percentage-calculator';
 import AgeCalculator from '@/components/age-calculator';
 import UnitConverter from '@/components/unit-converter';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Label } from '@/components/ui/label';
 
 export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
@@ -51,7 +53,17 @@ export default function Home() {
                <p className="text-center text-muted-foreground">Tools coming soon!</p>
             </TabsContent>
             <TabsContent value="settings" className="pt-4">
-               <p className="text-center text-muted-foreground">Settings coming soon!</p>
+               <Card className="w-full max-w-md mx-auto">
+                <CardHeader>
+                  <CardTitle>Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="theme-toggle">Dark Mode</Label>
+                        <ThemeToggle />
+                    </div>
+                </CardContent>
+               </Card>
             </TabsContent>
           </Tabs>
         </CardContent>
