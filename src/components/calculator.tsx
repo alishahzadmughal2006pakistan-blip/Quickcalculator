@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Divide, Minus, Plus, Share2, X } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
@@ -22,6 +23,12 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
   const [hasCalculated, setHasCalculated] = useState(false);
   const playClickSound = useSound('/sounds/click.mp3');
 
+  useEffect(() => {
+    if (history.length > 0) {
+      setLastCalculation(history[0]);
+    }
+  }, [history])
+
   const inputDigit = (digit: string) => {
     if (hasCalculated) {
       setExpression(digit);
@@ -35,7 +42,6 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
   };
 
   const inputDecimal = () => {
-    // To prevent adding multiple decimals in the same number
     const segments = expression.split(/([+\-*/^()])/);
     const lastSegment = segments[segments.length - 1];
     if (!lastSegment.includes('.')) {
@@ -47,7 +53,6 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
 
   const handleOperator = (op: string) => {
     setHasCalculated(false);
-    // Add space around binary operators for parsing, but not for unary minus.
     const newExpression = `${expression} ${op} `;
     setExpression(newExpression);
     setDisplayValue(newExpression);
@@ -160,7 +165,7 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
     if(isBinaryOperator) variant = 'default';
     if(isEquals) {
       variant = 'default';
-      style = { backgroundColor: '#4A90E2', color: 'white', ...customStyle };
+      style = { backgroundColor: 'hsl(var(--accent))', ...customStyle };
     }
     if(isClear || isUnaryOperator || isParenthesis || isSquare) variant = 'outline';
 
@@ -225,7 +230,7 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
             <ScrollArea className="h-16 sm:h-20 mb-2">
                 <div className="flex flex-col items-end gap-1 pr-2">
                   {history.slice(0, 5).reverse().map((item, index) => (
-                    <p key={index} className={`text-muted-foreground text-xs ${index === 0 ? 'font-bold opacity-100' : 'opacity-70'}`}>
+                    <p key={index} className={`text-muted-foreground text-xs animate-fade-in ${index === 0 ? 'font-bold opacity-100' : 'opacity-70'}`}>
                       {item}
                     </p>
                   ))}

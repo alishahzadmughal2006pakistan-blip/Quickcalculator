@@ -1,3 +1,4 @@
+
 'use client';
 import { Calculator, LayoutGrid, Wrench, Settings, Atom } from 'lucide-react';
 import { Button } from './ui/button';
@@ -18,7 +19,7 @@ interface BottomNavbarProps {
 }
 
 const navItems = [
-    { key: 'home', icon: <Calculator />, label: 'Calculator' },
+    { key: 'home', icon: <Calculator />, label: 'Home' },
     { key: 'free', icon: <LayoutGrid />, label: 'Free' },
     { key: 'advanced', icon: <Wrench />, label: 'Advanced' },
     { key: 'tools', icon: <Atom />, label: 'Tools' },
@@ -26,7 +27,7 @@ const navItems = [
 ];
 
 const categories = {
-    free: allCalculators.filter(c => c.category === 'free'),
+    free: allCalculators.filter(c => c.category === 'free' && c.key !== 'home'),
     advanced: allCalculators.filter(c => c.category === 'advanced'),
     tools: allCalculators.filter(c => c.category === 'tools'),
 };

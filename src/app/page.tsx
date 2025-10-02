@@ -1,8 +1,10 @@
 
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Gem, Pin, PinOff, Trash2 } from 'lucide-react';
+import { Gem, Pin, PinOff, Trash2, Share2 } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -25,6 +27,7 @@ import { FeatureLock } from '@/components/feature-lock';
 import { Switch } from '@/components/ui/switch';
 import { BannerAd } from '@/components/banner-ad';
 import SplashScreen from '@/components/splash-screen';
+import { useToast } from '@/hooks/use-toast';
 
 const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
@@ -74,7 +77,7 @@ const SettingsScreen = () => {
                 </div>
                 {!isPremium && (
                     <div className="border-t pt-4">
-                        <Card className="bg-gradient-to-br from-primary to-accent border-primary/20 text-center p-6 space-y-4">
+                        <Card className="bg-gradient-to-br from-blue-500 to-rose-500 border-primary/20 text-center p-6 space-y-4">
                              <div className="flex justify-center">
                                 <Gem className="w-12 h-12 text-primary-foreground" />
                             </div>
@@ -110,18 +113,32 @@ const SettingsScreen = () => {
 
 function HomePageContent() {
   const [history, setHistory] = useState<string[]>([]);
-  const [activeCalculator, setActiveCalculator] = useState<string>('home');
   const { pinnedCalculators, togglePinnedCalculator, isPremium } = useSettings();
+  const { toast } = useToast();
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeCalculator = searchParams.get('calculator') || 'home';
+
+  const setActiveCalculator = (key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('calculator', key);
+    router.push(`${pathname}?${params.toString()}`);
+  };
   
   useEffect(() => {
-    try {
-      const storedHistory = localStorage.getItem('calculatorHistory');
-      if (storedHistory) {
-        setHistory(JSON.parse(storedHistory));
-      }
-    } catch (error) {
-      console.error("Failed to load from localStorage", error);
-    }
+    const timer = setTimeout(() => {
+        try {
+            const storedHistory = localStorage.getItem('calculatorHistory');
+            if (storedHistory) {
+                setHistory(JSON.parse(storedHistory));
+            }
+        } catch (error) {
+            console.error("Failed to load from localStorage", error);
+        }
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -131,10 +148,38 @@ function HomePageContent() {
       console.error("Failed to save history to localStorage", error);
     }
   }, [history]);
-
   
   const handleAddToHistory = (calculation: string) => {
     setHistory(prev => [calculation, ...prev.slice(0, 49)]);
+  };
+
+  const handleShareResult = async (calculation: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Calculator Result',
+          text: `Here is my calculation from Quick Calculator+:\n${calculation}`,
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Sharing failed",
+          description: "Could not share the result at this time.",
+        })
+      }
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(calculation);
+        toast({
+          title: "Result Copied!",
+          description: "The calculation has been copied to your clipboard.",
+        })
+    } else {
+       toast({
+          variant: "destructive",
+          title: "Nothing to Share",
+          description: "Perform a calculation first.",
+        })
+    }
   };
 
   const renderActiveCalculator = () => {
@@ -142,9 +187,9 @@ function HomePageContent() {
         const pinned = allCalculators.filter(c => c.key !== 'home' && pinnedCalculators.includes(c.key));
 
         return (
-            <div className='space-y-4 animate-fade-in-scale'>
-                <div className="relative">
-                    <BasicCalculator addToHistory={handleAddToHistory} history={history} />
+            <div className='space-y-4'>
+                <div className="relative animate-fade-in-scale">
+                    <BasicCalculator addToHistory={handleAddToHistory} history={history} onShare={handleShareResult} />
                 </div>
                 
                 {pinned.length > 0 ? (
@@ -165,7 +210,7 @@ function HomePageContent() {
                         );
                     })
                 ) : (
-                    <Card className="text-center p-8 border-dashed">
+                    <Card className="text-center p-8 border-dashed animate-fade-in-scale">
                         <p className="text-muted-foreground">Pin your favorite calculators from the menu to see them here for quick access!</p>
                     </Card>
                 )}
@@ -187,14 +232,16 @@ function HomePageContent() {
       const mainContent = (
          <div className="relative group animate-fade-in-scale">
             <CalculatorComponent key={activeCalculator} />
-            <Button 
-                size="icon" 
-                variant="ghost" 
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                onClick={() => togglePinnedCalculator(calculator.key)}
-            >
-                {isPinned ? <PinOff className='text-primary' /> : <Pin />}
-            </Button>
+             {calculator.key !== 'home' && (
+                <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    onClick={() => togglePinnedCalculator(calculator.key)}
+                >
+                    {isPinned ? <PinOff className='text-primary' /> : <Pin />}
+                </Button>
+            )}
         </div>
       );
 

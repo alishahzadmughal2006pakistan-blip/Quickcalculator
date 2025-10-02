@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import { Calculator, Settings } from 'lucide-react';
@@ -21,7 +22,7 @@ const DesktopSidebar = ({ activeCalculator, setActiveCalculator }: { activeCalcu
     };
     const { pinnedCalculators } = useSettings();
 
-    const homeCalculators = allCalculators.filter(calc => pinnedCalculators.includes(calc.key));
+    const homeCalculators = allCalculators.filter(calc => pinnedCalculators.includes(calc.key) && calc.key !== 'home');
 
 
     return (
