@@ -97,6 +97,8 @@ const UnitConverter = () => {
             if (to === 'celsius') convertedValue = numValue - 273.15;
             else if (to === 'fahrenheit') convertedValue = ((numValue - 273.15) * 9/5) + 32;
             else convertedValue = numValue;
+        } else {
+             convertedValue = numValue;
         }
     } else {
         const fromFactor = currentUnits[fromUnit as keyof typeof currentUnits] as number;
@@ -109,8 +111,11 @@ const UnitConverter = () => {
   };
   
   useEffect(() => {
-    if(value) convert();
-    else setResult(null);
+    if(value) {
+        convert();
+    } else {
+        setResult(null);
+    }
   }, [value, fromUnit, toUnit, category]);
 
   const handleSwap = () => {
