@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,168 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowRightLeft, Loader } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+const currencies = [
+    { code: 'USD', name: 'United States Dollar' },
+    { code: 'EUR', name: 'Euro' },
+    { code: 'JPY', name: 'Japanese Yen' },
+    { code: 'GBP', name: 'British Pound Sterling' },
+    { code: 'AUD', name: 'Australian Dollar' },
+    { code: 'CAD', name: 'Canadian Dollar' },
+    { code: 'CHF', name: 'Swiss Franc' },
+    { code: 'CNY', name: 'Chinese Yuan' },
+    { code: 'SEK', name: 'Swedish Krona' },
+    { code: 'NZD', name: 'New Zealand Dollar' },
+    { code: 'MXN', name: 'Mexican Peso' },
+    { code: 'SGD', name: 'Singapore Dollar' },
+    { code: 'HKD', name: 'Hong Kong Dollar' },
+    { code: 'NOK', name: 'Norwegian Krone' },
+    { code: 'KRW', name: 'South Korean Won' },
+    { code: 'TRY', name: 'Turkish Lira' },
+    { code: 'RUB', name: 'Russian Ruble' },
+    { code: 'INR', name: 'Indian Rupee' },
+    { code: 'BRL', name: 'Brazilian Real' },
+    { code: 'ZAR', name: 'South African Rand' },
+    { code: 'AED', name: 'United Arab Emirates Dirham' },
+    { code: 'AFN', name: 'Afghan Afghani' },
+    { code: 'ALL', name: 'Albanian Lek' },
+    { code: 'AMD', name: 'Armenian Dram' },
+    { code: 'ANG', name: 'Netherlands Antillean Guilder' },
+    { code: 'AOA', name: 'Angolan Kwanza' },
+    { code: 'ARS', name: 'Argentine Peso' },
+    { code: 'AWG', name: 'Aruban Florin' },
+    { code: 'AZN', name: 'Azerbaijani Manat' },
+    { code: 'BAM', name: 'Bosnia-Herzegovina Convertible Mark' },
+    { code: 'BBD', name: 'Barbadian Dollar' },
+    { code: 'BDT', name: 'Bangladeshi Taka' },
+    { code: 'BGN', name: 'Bulgarian Lev' },
+    { code: 'BHD', name: 'Bahraini Dinar' },
+    { code: 'BIF', name: 'Burundian Franc' },
+    { code: 'BMD', name: 'Bermudan Dollar' },
+    { code: 'BND', name: 'Brunei Dollar' },
+    { code: 'BOB', name: 'Bolivian Boliviano' },
+    { code: 'BSD', name: 'Bahamian Dollar' },
+    { code: 'BTN', name: 'Bhutanese Ngultrum' },
+    { code: 'BWP', name: 'Botswanan Pula' },
+    { code: 'BYN', name: 'Belarusian Ruble' },
+    { code: 'BZD', name: 'Belize Dollar' },
+    { code: 'CDF', name: 'Congolese Franc' },
+    { code: 'CLP', name: 'Chilean Peso' },
+    { code: 'COP', name: 'Colombian Peso' },
+    { code: 'CRC', name: 'Costa Rican Colón' },
+    { code: 'CUP', name: 'Cuban Peso' },
+    { code: 'CVE', name: 'Cape Verdean Escudo' },
+    { code: 'CZK', name: 'Czech Republic Koruna' },
+    { code: 'DJF', name: 'Djiboutian Franc' },
+    { code: 'DKK', name: 'Danish Krone' },
+    { code: 'DOP', name: 'Dominican Peso' },
+    { code: 'DZD', name: 'Algerian Dinar' },
+    { code: 'EGP', name: 'Egyptian Pound' },
+    { code: 'ERN', name: 'Eritrean Nakfa' },
+    { code: 'ETB', name: 'Ethiopian Birr' },
+    { code: 'FJD', name: 'Fijian Dollar' },
+    { code: 'FKP', name: 'Falkland Islands Pound' },
+    { code: 'FOK', name: 'Faroese Króna' },
+    { code: 'GEL', name: 'Georgian Lari' },
+    { code: 'GGP', name: 'Guernsey Pound' },
+    { code: 'GHS', name: 'Ghanaian Cedi' },
+    { code: 'GIP', name: 'Gibraltar Pound' },
+    { code: 'GMD', name: 'Gambian Dalasi' },
+    { code: 'GNF', name: 'Guinean Franc' },
+    { code: 'GTQ', name: 'Guatemalan Quetzal' },
+    { code: 'GYD', name: 'Guyanaese Dollar' },
+    { code: 'HNL', name: 'Honduran Lempira' },
+    { code: 'HRK', name: 'Croatian Kuna' },
+    { code: 'HTG', name: 'Haitian Gourde' },
+    { code: 'HUF', name: 'Hungarian Forint' },
+    { code: 'IDR', name: 'Indonesian Rupiah' },
+    { code: 'ILS', name: 'Israeli New Sheqel' },
+    { code: 'IMP', name: 'Isle of Man Pound' },
+    { code: 'IQD', name: 'Iraqi Dinar' },
+    { code: 'IRR', name: 'Iranian Rial' },
+    { code: 'ISK', name: 'Icelandic Króna' },
+    { code: 'JEP', name: 'Jersey Pound' },
+    { code: 'JMD', name: 'Jamaican Dollar' },
+    { code: 'JOD', name: 'Jordanian Dinar' },
+    { code: 'KES', name: 'Kenyan Shilling' },
+    { code: 'KGS', name: 'Kyrgystani Som' },
+    { code: 'KHR', name: 'Cambodian Riel' },
+    { code: 'KID', name: 'Kiribati Dollar' },
+    { code: 'KMF', name: 'Comorian Franc' },
+    { code: 'KWD', name: 'Kuwaiti Dinar' },
+    { code: 'KYD', name: 'Cayman Islands Dollar' },
+    { code: 'KZT', name: 'Kazakhstani Tenge' },
+    { code: 'LAK', name: 'Laotian Kip' },
+    { code: 'LBP', name: 'Lebanese Pound' },
+    { code: 'LKR', name: 'Sri Lankan Rupee' },
+    { code: 'LRD', name: 'Liberian Dollar' },
+    { code: 'LSL', name: 'Lesotho Loti' },
+    { code: 'LYD', name: 'Libyan Dinar' },
+    { code: 'MAD', name: 'Moroccan Dirham' },
+    { code: 'MDL', name: 'Moldovan Leu' },
+    { code: 'MGA', name: 'Malagasy Ariary' },
+    { code: 'MKD', name: 'Macedonian Denar' },
+    { code: 'MMK', name: 'Myanma Kyat' },
+    { code: 'MNT', name: 'Mongolian Tugrik' },
+    { code: 'MOP', name: 'Macanese Pataca' },
+    { code: 'MRU', name: 'Mauritanian Ouguiya' },
+    { code: 'MUR', name: 'Mauritian Rupee' },
+    { code: 'MVR', name: 'Maldivian Rufiyaa' },
+    { code: 'MWK', name: 'Malawian Kwacha' },
+    { code: 'MYR', name: 'Malaysian Ringgit' },
+    { code: 'MZN', name: 'Mozambican Metical' },
+    { code: 'NAD', name: 'Namibian Dollar' },
+    { code: 'NGN', name: 'Nigerian Naira' },
+    { code: 'NIO', name: 'Nicaraguan Córdoba' },
+    { code: 'NPR', name: 'Nepalese Rupee' },
+    { code: 'OMR', name: 'Omani Rial' },
+    { code: 'PAB', name: 'Panamanian Balboa' },
+    { code: 'PEN', name: 'Peruvian Nuevo Sol' },
+    { code: 'PGK', name: 'Papua New Guinean Kina' },
+    { code: 'PHP', name: 'Philippine Peso' },
+    { code: 'PKR', name: 'Pakistani Rupee' },
+    { code: 'PLN', name: 'Polish Zloty' },
+    { code: 'PYG', name: 'Paraguayan Guarani' },
+    { code: 'QAR', name: 'Qatari Rial' },
+    { code: 'RON', name: 'Romanian Leu' },
+    { code: 'RSD', name: 'Serbian Dinar' },
+    { code: 'RWF', name: 'Rwandan Franc' },
+    { code: 'SAR', name: 'Saudi Riyal' },
+    { code: 'SBD', name: 'Solomon Islands Dollar' },
+    { code: 'SCR', name: 'Seychellois Rupee' },
+    { code: 'SDG', name: 'Sudanese Pound' },
+    { code: 'SHP', name: 'Saint Helena Pound' },
+    { code: 'SOS', name: 'Somali Shilling' },
+    { code: 'SRD', name: 'Surinamese Dollar' },
+    { code: 'SSP', name: 'South Sudanese Pound' },
+    { code: 'STN', name: 'São Tomé and Príncipe Dobra' },
+    { code: 'SYP', name: 'Syrian Pound' },
+    { code: 'SZL', name: 'Swazi Lilangeni' },
+    { code: 'THB', name: 'Thai Baht' },
+    { code: 'TJS', name: 'Tajikistani Somoni' },
+    { code: 'TMT', name: 'Turkmenistani Manat' },
+    { code: 'TND', name: 'Tunisian Dinar' },
+    { code: 'TOP', name: 'Tongan Pa\'anga' },
+    { code: 'TTD', name: 'Trinidad and Tobago Dollar' },
+    { code: 'TWD', name: 'New Taiwan Dollar' },
+    { code: 'TZS', name: 'Tanzanian Shilling' },
+    { code: 'UAH', name: 'Ukrainian Hryvnia' },
+    { code: 'UGX', name: 'Ugandan Shilling' },
+    { code: 'UYU', name: 'Uruguayan Peso' },
+    { code: 'UZS', name: 'Uzbekistan Som' },
+    { code: 'VES', name: 'Venezuelan Bolívar Soberano' },
+    { code: 'VND', name: 'Vietnamese Dong' },
+    { code: 'VUV', name: 'Vanuatu Vatu' },
+    { code: 'WST', name: 'Samoan Tala' },
+    { code: 'XAF', name: 'CFA Franc BEAC' },
+    { code: 'XCD', name: 'East Caribbean Dollar' },
+    { code: 'XDR', name: 'Special Drawing Rights' },
+    { code: 'XOF', name: 'CFA Franc BCEAO' },
+    { code: 'XPF', name: 'CFP Franc' },
+    { code: 'YER', name: 'Yemeni Rial' },
+    { code: 'ZMW', name: 'Zambian Kwacha' },
+    { code: 'ZWL', name: 'Zimbabwean Dollar' },
+  ];
+
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState('1');
   const [fromCurrency, setFromCurrency] = useState('USD');
@@ -16,33 +178,7 @@ const CurrencyConverter = () => {
   const [result, setResult] = useState<string | null>(null);
   const [exchangeRate, setExchangeRate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingCurrencies, setIsFetchingCurrencies] = useState(true);
-  const [currencies, setCurrencies] = useState<{[key: string]: string}>({});
   const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchCurrencies = async () => {
-      setIsFetchingCurrencies(true);
-      try {
-        const res = await fetch('https://api.frankfurter.app/currencies');
-        if (!res.ok) {
-          throw new Error('Could not fetch currency list');
-        }
-        const data = await res.json();
-        setCurrencies(data);
-      } catch (error) {
-        console.error(error);
-        toast({
-          variant: 'destructive',
-          title: 'Error Loading Currencies',
-          description: 'Could not load the list of available currencies. Please try again later.',
-        });
-      } finally {
-        setIsFetchingCurrencies(false);
-      }
-    };
-    fetchCurrencies();
-  }, [toast]);
 
   const handleConvert = async () => {
     const numAmount = parseFloat(amount);
@@ -62,33 +198,27 @@ const CurrencyConverter = () => {
     setExchangeRate(null);
 
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?amount=${numAmount}&from=${fromCurrency}&to=${toCurrency}`);
+      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
       if (!res.ok) {
-        throw new Error('Failed to fetch rates');
+        throw new Error('Failed to fetch exchange rates.');
       }
       const data = await res.json();
       const rate = data.rates[toCurrency];
+
       if (!rate) {
           throw new Error('Conversion rate not available for the selected currency pair.');
       }
       
-      const convertedAmount = rate;
+      const convertedAmount = numAmount * rate;
       setResult(convertedAmount.toFixed(2));
-      
-      // Fetch the inverse rate for the exchange rate display
-      const rateRes = await fetch(`https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`);
-       if (!rateRes.ok) {
-        throw new Error('Failed to fetch individual rate');
-      }
-      const rateData = await rateRes.json();
-      setExchangeRate(`1 ${fromCurrency} = ${rateData.rates[toCurrency]} ${toCurrency}`);
+      setExchangeRate(`1 ${fromCurrency} = ${rate} ${toCurrency}`);
 
     } catch (error: any) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Conversion Failed",
-        description: error.message || "Could not fetch the latest exchange rates. The selected currency pair may not be supported.",
+        description: error.message || "Could not fetch the latest exchange rates.",
       });
     } finally {
       setIsLoading(false);
@@ -100,8 +230,6 @@ const CurrencyConverter = () => {
     setFromCurrency(toCurrency);
     setToCurrency(temp);
   };
-
-  const currencyOptions = Object.entries(currencies);
 
   return (
     <Card className="w-full shadow-lg rounded-2xl">
@@ -119,34 +247,26 @@ const CurrencyConverter = () => {
         <div className="flex items-center gap-2">
           <div className="flex-1 space-y-2">
             <Label htmlFor="fromCurrency">From</Label>
-            <Select value={fromCurrency} onValueChange={setFromCurrency} disabled={isFetchingCurrencies}>
+            <Select value={fromCurrency} onValueChange={setFromCurrency}>
               <SelectTrigger id="fromCurrency">
-                <SelectValue placeholder={isFetchingCurrencies ? "Loading..." : "From"} />
+                <SelectValue placeholder="From" />
               </SelectTrigger>
               <SelectContent>
-                {isFetchingCurrencies ? (
-                    <SelectItem value="loading" disabled>Loading currencies...</SelectItem>
-                ) : (
-                    currencyOptions.map(([code, name]) => <SelectItem key={code} value={code}>{code} - {name}</SelectItem>)
-                )}
+                  {currencies.map(({code, name}) => <SelectItem key={code} value={code}>{code} - {name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <Button variant="ghost" size="icon" className="mt-8" onClick={handleSwap} disabled={isFetchingCurrencies}>
+          <Button variant="ghost" size="icon" className="mt-8" onClick={handleSwap}>
             <ArrowRightLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1 space-y-2">
             <Label htmlFor="toCurrency">To</Label>
-            <Select value={toCurrency} onValueChange={setToCurrency} disabled={isFetchingCurrencies}>
+            <Select value={toCurrency} onValueChange={setToCurrency}>
               <SelectTrigger id="toCurrency">
-                <SelectValue placeholder={isFetchingCurrencies ? "Loading..." : "To"} />
+                <SelectValue placeholder="To" />
               </SelectTrigger>
               <SelectContent>
-                {isFetchingCurrencies ? (
-                    <SelectItem value="loading" disabled>Loading currencies...</SelectItem>
-                ) : (
-                    currencyOptions.map(([code, name]) => <SelectItem key={code} value={code}>{code} - {name}</SelectItem>)
-                )}
+                {currencies.map(({code, name}) => <SelectItem key={code} value={code}>{code} - {name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -170,7 +290,7 @@ const CurrencyConverter = () => {
           </div>
         )}
 
-        <Button onClick={handleConvert} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#2980B9' }} disabled={isLoading || isFetchingCurrencies}>
+        <Button onClick={handleConvert} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#2980B9' }} disabled={isLoading}>
           {isLoading ? <Loader className="animate-spin" /> : 'Convert'}
         </Button>
       </CardContent>
