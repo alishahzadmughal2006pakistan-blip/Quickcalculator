@@ -9,6 +9,7 @@ import BmiCalculator from '@/components/bmi-calculator';
 import PercentageCalculator from '@/components/percentage-calculator';
 import AgeCalculator from '@/components/age-calculator';
 import UnitConverter from '@/components/unit-converter';
+import LoanCalculator from '@/components/loan-calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,9 @@ export default function Home() {
               </div>
             </TabsContent>
             <TabsContent value="advanced" className="pt-4">
-              <p className="text-center text-muted-foreground">Advanced calculators coming soon!</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
+                <LoanCalculator />
+              </div>
             </TabsContent>
             <TabsContent value="tools" className="pt-4">
                <p className="text-center text-muted-foreground">Tools coming soon!</p>
