@@ -130,7 +130,7 @@ function HomePageContent() {
 
   const renderActiveCalculator = () => {
     if (activeCalculator === 'home') {
-        const pinned = allCalculators.filter(c => pinnedCalculators.includes(c.key));
+        const pinned = allCalculators.filter(c => c.key !== 'home' && pinnedCalculators.includes(c.key));
 
         return (
             <div className='space-y-4'>
