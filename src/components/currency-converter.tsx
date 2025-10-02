@@ -1,34 +1,64 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRightLeft, DollarSign } from 'lucide-react';
+import { ArrowRightLeft, DollarSign, Loader } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-const popularCurrencies = ['USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'INR'];
+const popularCurrencies = ['USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'INR', 'BRL', 'RUB', 'ZAR'];
 
 const CurrencyConverter = () => {
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('1');
   const [fromCurrency, setFromCurrency] = useState('USD');
   const [toCurrency, setToCurrency] = useState('EUR');
   const [result, setResult] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleConvert = () => {
-    // Placeholder for API call
-    console.log(`Converting ${amount} from ${fromCurrency} to ${toCurrency}`);
-    // For now, just display a placeholder result
+  const handleConvert = async () => {
     const numAmount = parseFloat(amount);
-    if(isNaN(numAmount)) {
-        setResult(null);
-        return;
+    if (isNaN(numAmount) || !amount) {
+      setResult(null);
+      return;
     }
-    // This is a fake conversion rate
-    const fakeRate = 1.1; 
-    setResult((numAmount * fakeRate).toFixed(2));
+    if (fromCurrency === toCurrency) {
+      setResult(numAmount.toFixed(2));
+      return;
+    }
+
+    setIsLoading(true);
+    setResult(null);
+
+    try {
+      const res = await fetch(`https://api.frankfurter.app/latest?amount=${numAmount}&from=${fromCurrency}&to=${toCurrency}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch rates');
+      }
+      const data = await res.json();
+      setResult(data.rates[toCurrency].toFixed(2));
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Conversion Failed",
+        description: "Could not fetch the latest exchange rates. Please try again later.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if(amount && fromCurrency && toCurrency) {
+        handleConvert();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amount, fromCurrency, toCurrency]);
+
 
   const handleSwap = () => {
     setFromCurrency(toCurrency);
@@ -77,17 +107,25 @@ const CurrencyConverter = () => {
           </div>
         </div>
 
-        {result && (
-          <div className="border-t border-border pt-4 mt-4 text-center space-y-2">
-            <p className="text-muted-foreground">Converted Amount</p>
-            <p className="text-3xl font-bold text-primary break-all">
-              {result} {toCurrency}
-            </p>
+        {(isLoading || result) && (
+          <div className="border-t border-border pt-4 mt-4 text-center space-y-2 min-h-[80px] flex flex-col justify-center">
+            {isLoading ? (
+                <div className='flex justify-center items-center'>
+                    <Loader className="animate-spin text-primary" />
+                </div>
+            ) : result && (
+                <>
+                    <p className="text-muted-foreground">Converted Amount</p>
+                    <p className="text-3xl font-bold text-primary break-all">
+                    {result} {toCurrency}
+                    </p>
+                </>
+            )}
           </div>
         )}
 
         <Button onClick={handleConvert} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#2980B9' }}>
-          Convert
+          {isLoading ? <Loader className="animate-spin" /> : 'Convert'}
         </Button>
       </CardContent>
     </Card>
