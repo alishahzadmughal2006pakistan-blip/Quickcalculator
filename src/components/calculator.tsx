@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Divide, Minus, Plus, X } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 type CalculatorProps = {
   addToHistory: (calculation: string) => void;
@@ -146,46 +147,53 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-muted text-right rounded-lg p-4 break-all">
-        <ScrollArea className="h-20 mb-2">
-            <div className="flex flex-col items-end gap-1 pr-2">
-              {history.slice(0, 5).reverse().map((item, index) => (
-                <p key={index} className={`text-muted-foreground text-sm ${index === 4 ? 'font-bold' : ''}`}>
-                  {item}
-                </p>
-              ))}
-            </div>
-        </ScrollArea>
-        <p className="text-6xl font-light text-foreground">{displayValue}</p>
-      </div>
+    <Card className="w-full shadow-lg rounded-2xl">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold text-center">Basic Calculator</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-4">
+          <div className="bg-muted text-right rounded-lg p-4 break-all">
+            <ScrollArea className="h-20 mb-2">
+                <div className="flex flex-col items-end gap-1 pr-2">
+                  {history.slice(0, 5).reverse().map((item, index) => (
+                    <p key={index} className={`text-muted-foreground text-sm ${index === 4 ? 'font-bold' : ''}`}>
+                      {item}
+                    </p>
+                  ))}
+                </div>
+            </ScrollArea>
+            <p className="text-6xl font-light text-foreground">{displayValue}</p>
+          </div>
 
-      <div className="grid grid-cols-4 gap-2">
-        {renderButton('C')}
-        {renderButton('()', 'hidden')}
-        {renderButton('%', 'hidden')}
-        {renderButton('/')}
+          <div className="grid grid-cols-4 gap-2">
+            {renderButton('C')}
+            {renderButton('()', 'hidden')}
+            {renderButton('%', 'hidden')}
+            {renderButton('/')}
 
-        {renderButton('7')}
-        {renderButton('8')}
-        {renderButton('9')}
-        {renderButton('*')}
+            {renderButton('7')}
+            {renderButton('8')}
+            {renderButton('9')}
+            {renderButton('*')}
 
-        {renderButton('4')}
-        {renderButton('5')}
-        {renderButton('6')}
-        {renderButton('-')}
-        
-        {renderButton('1')}
-        {renderButton('2')}
-        {renderButton('3')}
-        {renderButton('+')}
-        
-        {renderButton('0', 'col-span-2')}
-        {renderButton('.')}
-        {renderButton('=')}
-      </div>
-    </div>
+            {renderButton('4')}
+            {renderButton('5')}
+            {renderButton('6')}
+            {renderButton('-')}
+            
+            {renderButton('1')}
+            {renderButton('2')}
+            {renderButton('3')}
+            {renderButton('+')}
+            
+            {renderButton('0', 'col-span-2')}
+            {renderButton('.')}
+            {renderButton('=')}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
