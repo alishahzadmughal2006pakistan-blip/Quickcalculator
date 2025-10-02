@@ -11,10 +11,10 @@ import { useSound } from '@/hooks/use-sound';
 
 type CalculatorProps = {
   addToHistory: (calculation: string) => void;
-  history: string[];
+  history?: string[];
 };
 
-const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
+const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
   const [expression, setExpression] = useState('0');
   const [displayValue, setDisplayValue] = useState('0');
   const [lastCalculation, setLastCalculation] = useState<string | null>(null);
@@ -275,3 +275,5 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
 };
 
 export default BasicCalculator;
+
+    
