@@ -37,6 +37,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     '*': (first, second) => first * second,
     '+': (first, second) => first + second,
     '-': (first, second) => first - second,
+    '^': (first, second) => Math.pow(first, second),
   };
 
   const handleOperator = (nextOperator: string) => {
@@ -52,7 +53,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     } else if (operator) {
       try {
         const result = performCalculation[operator](firstOperand, inputValue);
-        if(!isFinite(result)) throw new Error("Division by zero");
+        if(!isFinite(result)) throw new Error("Calculation error");
         const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
         addToHistory(calculationString);
         setDisplayValue(String(result));
@@ -65,6 +66,41 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
 
     setWaitingForSecondOperand(true);
     setOperator(nextOperator);
+  };
+  
+  const handleUnaryOperation = (operation: string) => {
+    const inputValue = parseFloat(displayValue);
+    let result: number;
+    let calculationString = '';
+
+    try {
+        if (operation === '√') {
+            if (inputValue < 0) throw new Error("Invalid input for square root");
+            result = Math.sqrt(inputValue);
+            calculationString = `√(${inputValue}) = ${result}`;
+        } else if (operation === 'x²') {
+            result = Math.pow(inputValue, 2);
+            calculationString = `(${inputValue})² = ${result}`;
+        } else if (operation === 'log') {
+            if(inputValue <= 0) throw new Error("Invalid input for log");
+            result = Math.log10(inputValue);
+            calculationString = `log(${inputValue}) = ${result}`;
+        } else {
+            throw new Error("Unknown operation");
+        }
+
+        if(!isFinite(result)) throw new Error("Calculation error");
+        addToHistory(calculationString);
+        setDisplayValue(String(result));
+        setFirstOperand(result);
+        setWaitingForSecondOperand(true);
+
+    } catch (e: any) {
+        setDisplayValue("Error");
+        setFirstOperand(null);
+        setOperator(null);
+        setWaitingForSecondOperand(false);
+    }
   };
 
   const resetCalculator = () => {
@@ -79,7 +115,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
       const inputValue = parseFloat(displayValue);
        try {
         const result = performCalculation[operator](firstOperand, inputValue);
-        if(!isFinite(result)) throw new Error("Division by zero");
+        if(!isFinite(result)) throw new Error("Calculation error");
         const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
         addToHistory(calculationString);
         setDisplayValue(String(result));
@@ -101,13 +137,14 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   
   const renderButton = (key: string, className? : string, customClick?: () => void) => {
     const isNumber = !isNaN(parseInt(key)) || key === '.';
-    const isOperator = ['/', '*', '-', '+'].includes(key);
+    const isBinaryOperator = ['/', '*', '-', '+', '^'].includes(key);
+    const isUnaryOperator = ['√', 'x²', 'log'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
     
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
-    if(isOperator || isEquals) variant = 'default';
-    if(isClear || key === '+/-' || key === '%') variant = 'outline';
+    if(isBinaryOperator || isEquals) variant = 'default';
+    if(isClear || key === '+/-' || key === '%' || isUnaryOperator) variant = 'outline';
 
     const iconMap: { [key: string]: React.ReactNode } = {
         '/': <Divide size={24} />,
@@ -116,7 +153,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
         '+': <Plus size={24} />,
     };
     
-    let finalClassName = `h-16 sm:h-20 text-2xl sm:text-3xl transition-transform active:scale-95 rounded-full ${className}`;
+    let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-full ${className}`;
 
     return (
         <Button
@@ -140,8 +177,10 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
             if (isNumber) {
               if (key === '.') inputDecimal();
               else inputDigit(key);
-            } else if (isOperator) {
+            } else if (isBinaryOperator) {
               handleOperator(key);
+            } else if (isUnaryOperator) {
+              handleUnaryOperation(key);
             } else if (isEquals) {
               handleEquals();
             } else if (isClear) {
@@ -174,30 +213,34 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
             <p className="text-5xl sm:text-6xl font-light text-foreground">{displayValue}</p>
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-2">
+            {renderButton('√')}
+            {renderButton('x²')}
+            {renderButton('^')}
+            {renderButton('log')}
             {renderButton('C')}
-            {renderButton('+/-', '', toggleSign)}
-            {renderButton('%', '', () => setDisplayValue(String(parseFloat(displayValue) / 100)))}
-            {renderButton('/')}
-
+            
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
-            {renderButton('*')}
+            {renderButton('+/-', '', toggleSign)}
+            {renderButton('/')}
 
             {renderButton('4')}
             {renderButton('5')}
             {renderButton('6')}
-            {renderButton('-')}
-            
+            {renderButton('%', '', () => setDisplayValue(String(parseFloat(displayValue) / 100)))}
+            {renderButton('*')}
+
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
-            {renderButton('+')}
+            {renderButton('=','row-span-2 h-auto')}
+            {renderButton('-')}
             
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
-            {renderButton('=')}
+            {renderButton('+')}
           </div>
         </div>
       </CardContent>
