@@ -63,7 +63,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-2 sm:p-4 font-body">
-      <Card className="w-full max-w-6xl shadow-2xl rounded-2xl bg-card border-none sm:border">
+      <Card className="w-full max-w-7xl shadow-2xl rounded-2xl bg-card border-none sm:border">
         <CardHeader className="text-center p-4 sm:p-6">
           <CardTitle className="font-headline text-3xl font-bold tracking-tight text-primary">Quick Calculator+</CardTitle>
         </CardHeader>
@@ -76,13 +76,17 @@ export default function Home() {
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="free" className="pt-4">
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-                  <BasicCalculator addToHistory={handleAddToHistory} history={history} />
-                  <TipCalculator />
-                  <BmiCalculator />
-                  <PercentageCalculator />
-                  <AgeCalculator />
-                  <UnitConverter />
+               <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8">
+                  <div className="lg:col-span-2">
+                    <BasicCalculator addToHistory={handleAddToHistory} history={history} />
+                  </div>
+                  <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+                    <TipCalculator />
+                    <BmiCalculator />
+                    <PercentageCalculator />
+                    <AgeCalculator />
+                    <UnitConverter />
+                  </div>
               </div>
             </TabsContent>
             <TabsContent value="advanced" className="pt-4">
