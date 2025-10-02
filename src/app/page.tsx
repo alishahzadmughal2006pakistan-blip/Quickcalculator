@@ -11,6 +11,7 @@ import AgeCalculator from '@/components/age-calculator';
 import UnitConverter from '@/components/unit-converter';
 import LoanCalculator from '@/components/loan-calculator';
 import CurrencyConverter from '@/components/currency-converter';
+import ScientificCalculator from '@/components/scientific-calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,6 @@ export default function Home() {
   }, []);
   
   const handleAddToHistory = (calculation: string) => {
-    // Add to history, keeping a max of 50 entries
     setHistory(prev => [calculation, ...prev.slice(0, 49)]);
   };
 
@@ -73,7 +73,7 @@ export default function Home() {
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="free" className="pt-4">
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                   <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                   <TipCalculator />
                   <BmiCalculator />
@@ -86,6 +86,7 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
                 <LoanCalculator />
                 <CurrencyConverter />
+                <ScientificCalculator />
               </div>
             </TabsContent>
             <TabsContent value="tools" className="pt-4">
