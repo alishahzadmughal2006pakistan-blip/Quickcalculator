@@ -58,7 +58,7 @@ const PrivacyPolicyPage = () => {
             <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
 
             <h3 className="font-semibold mt-4">7. Contact Us</h3>
-            <p>If you have any questions about this Privacy Policy, please contact us at [Your Support Email Address].</p>
+            <p>If you have any questions about this Privacy Policy, please contact us at alimughal198777@gmail.com.</p>
 
           </CardContent>
         </Card>
