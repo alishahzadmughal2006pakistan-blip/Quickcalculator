@@ -95,7 +95,7 @@ const UnitConverter = () => {
             else convertedValue = numValue;
         } else if (from === 'kelvin') {
             if (to === 'celsius') convertedValue = numValue - 273.15;
-            else if (to === 'fahrenheit') convertedValue = ((numValue - 273.15) * 9/5) + 32;
+            else if (to === 'fahrenheit') convertedValue = ((fromValue - 273.15) * 9/5) + 32;
             else convertedValue = numValue;
         }
     } else {
