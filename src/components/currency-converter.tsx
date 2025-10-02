@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -138,8 +139,6 @@ const currencies = [
     { code: 'SEK', name: 'Swedish Krona' },
     { code: 'SGD', name: 'Singapore Dollar' },
     { code: 'SHP', name: 'Saint Helena Pound' },
-    { code: 'SLE', name: 'Sierra Leonean Leone' },
-    { code: 'SLL', name: 'Sierra Leonean Leone' },
     { code: 'SOS', name: 'Somali Shilling' },
     { code: 'SRD', name: 'Surinamese Dollar' },
     { code: 'SSP', name: 'South Sudanese Pound' },
@@ -215,26 +214,12 @@ const CurrencyConverter = () => {
       toast({
         variant: "destructive",
         title: "Conversion Failed",
-        description: "Could not fetch the latest exchange rates. Please try again later.",
+        description: "Could not fetch the latest exchange rates. The selected currency pair may not be supported.",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
-  useEffect(() => {
-    const handler = setTimeout(() => {
-        if(amount && fromCurrency && toCurrency) {
-            handleConvert();
-        }
-    }, 500);
-
-    return () => {
-        clearTimeout(handler);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amount, fromCurrency, toCurrency]);
-
 
   const handleSwap = () => {
     setFromCurrency(toCurrency);
@@ -309,3 +294,5 @@ const CurrencyConverter = () => {
 };
 
 export default CurrencyConverter;
+
+    
