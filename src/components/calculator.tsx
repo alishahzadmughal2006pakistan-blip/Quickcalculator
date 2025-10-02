@@ -10,7 +10,7 @@ type CalculatorProps = {
   history: string[];
 };
 
-const Calculator = ({ addToHistory, history }: CalculatorProps) => {
+const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   const [displayValue, setDisplayValue] = useState('0');
   const [firstOperand, setFirstOperand] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
@@ -49,11 +49,17 @@ const Calculator = ({ addToHistory, history }: CalculatorProps) => {
     if (firstOperand === null) {
       setFirstOperand(inputValue);
     } else if (operator) {
-      const result = performCalculation[operator](firstOperand, inputValue);
-      const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
-      addToHistory(calculationString);
-      setDisplayValue(String(result));
-      setFirstOperand(result);
+      try {
+        const result = performCalculation[operator](firstOperand, inputValue);
+        if(!isFinite(result)) throw new Error("Division by zero");
+        const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
+        addToHistory(calculationString);
+        setDisplayValue(String(result));
+        setFirstOperand(result);
+      } catch (error) {
+        setDisplayValue("Error");
+        setFirstOperand(null);
+      }
     }
 
     setWaitingForSecondOperand(true);
@@ -70,25 +76,33 @@ const Calculator = ({ addToHistory, history }: CalculatorProps) => {
   const handleEquals = () => {
     if (operator && firstOperand !== null) {
       const inputValue = parseFloat(displayValue);
-      const result = performCalculation[operator](firstOperand, inputValue);
-      const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
-      addToHistory(calculationString);
-      setDisplayValue(String(result));
-      setFirstOperand(null);
-      setOperator(null);
-      setWaitingForSecondOperand(false);
+       try {
+        const result = performCalculation[operator](firstOperand, inputValue);
+        if(!isFinite(result)) throw new Error("Division by zero");
+        const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
+        addToHistory(calculationString);
+        setDisplayValue(String(result));
+        setFirstOperand(null);
+        setOperator(null);
+        setWaitingForSecondOperand(false);
+      } catch (error) {
+        setDisplayValue("Error");
+        setFirstOperand(null);
+        setOperator(null);
+        setWaitingForSecondOperand(false);
+      }
     }
   };
   
-  const renderButton = (key: string) => {
+  const renderButton = (key: string, className? : string) => {
     const isNumber = !isNaN(parseInt(key)) || key === '.';
     const isOperator = ['/', '*', '-', '+'].includes(key);
     const isEquals = key === '=';
-    const isClear = key === 'Clear';
+    const isClear = key === 'C';
     
-    let variant: 'default' | 'secondary' | 'outline' = 'secondary';
+    let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
     if(isOperator || isEquals) variant = 'default';
-    if(isClear) variant = 'destructive';
+    if(isClear) variant = 'outline';
 
     const iconMap: { [key: string]: React.ReactNode } = {
         '/': <Divide size={28} />,
@@ -96,14 +110,24 @@ const Calculator = ({ addToHistory, history }: CalculatorProps) => {
         '-': <Minus size={28} />,
         '+': <Plus size={28} />,
     };
+    
+    let finalClassName = `h-20 text-3xl transition-transform active:scale-95 rounded-full ${className}`;
 
     return (
         <Button
           key={key}
-          variant={isOperator || isEquals ? 'default' : isClear ? 'destructive' : 'secondary'}
+          variant={variant}
           size="lg"
-          className={`h-20 text-3xl transition-transform active:scale-95 rounded-full ${isEquals || key === '0' ? 'col-span-2' : ''}`}
+          className={finalClassName}
           onClick={() => {
+            if (displayValue === "Error") {
+              resetCalculator();
+              if(!isClear) {
+                 if (key === '.') inputDecimal();
+                 else inputDigit(key);
+              }
+              return;
+            }
             if (isNumber) {
               if (key === '.') inputDecimal();
               else inputDigit(key);
@@ -137,13 +161,32 @@ const Calculator = ({ addToHistory, history }: CalculatorProps) => {
       </div>
 
       <div className="grid grid-cols-4 gap-2">
-        {renderButton('Clear')}
+        {renderButton('C')}
+        {renderButton('()', 'hidden')}
+        {renderButton('%', 'hidden')}
         {renderButton('/')}
-        {['7', '8', '9', '*', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.'].map(key => renderButton(key))}
+
+        {renderButton('7')}
+        {renderButton('8')}
+        {renderButton('9')}
+        {renderButton('*')}
+
+        {renderButton('4')}
+        {renderButton('5')}
+        {renderButton('6')}
+        {renderButton('-')}
+        
+        {renderButton('1')}
+        {renderButton('2')}
+        {renderButton('3')}
+        {renderButton('+')}
+        
+        {renderButton('0', 'col-span-2')}
+        {renderButton('.')}
         {renderButton('=')}
       </div>
     </div>
   );
 };
 
-export default Calculator;
+export default BasicCalculator;

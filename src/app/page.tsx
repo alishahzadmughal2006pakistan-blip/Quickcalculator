@@ -1,7 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Calculator from '@/components/calculator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calculator, LayoutGrid, Wrench, Settings } from 'lucide-react';
+import BasicCalculator from '@/components/calculator';
 
 export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
@@ -18,7 +20,26 @@ export default function Home() {
           <CardTitle className="font-headline text-3xl font-bold tracking-tight text-primary">Quick Calculator+</CardTitle>
         </CardHeader>
         <CardContent>
-           <Calculator addToHistory={handleAddToHistory} history={history} />
+          <Tabs defaultValue="free" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="free"><Calculator className="w-4 h-4 mr-1" /> Free</TabsTrigger>
+              <TabsTrigger value="advanced"><LayoutGrid className="w-4 h-4 mr-1" /> Advanced</TabsTrigger>
+              <TabsTrigger value="tools"><Wrench className="w-4 h-4 mr-1" /> Tools</TabsTrigger>
+              <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
+            </TabsList>
+            <TabsContent value="free" className="pt-4">
+              <BasicCalculator addToHistory={handleAddToHistory} history={history} />
+            </TabsContent>
+            <TabsContent value="advanced" className="pt-4">
+              <p className="text-center text-muted-foreground">Advanced calculators coming soon!</p>
+            </TabsContent>
+            <TabsContent value="tools" className="pt-4">
+               <p className="text-center text-muted-foreground">Tools coming soon!</p>
+            </TabsContent>
+            <TabsContent value="settings" className="pt-4">
+               <p className="text-center text-muted-foreground">Settings coming soon!</p>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </main>
