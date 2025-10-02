@@ -156,7 +156,7 @@ const UnitConverter = () => {
                         onChange={(e) => setAiQuery(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleAiConvert()}
                     />
-                    <Button onClick={handleAiConvert} disabled={isPending} className="bg-purple-600 hover:bg-purple-700">
+                    <Button onClick={handleAiConvert} disabled={isPending} variant="secondary">
                         {isPending ? <Loader className="animate-spin" /> : <Wand2 />}
                     </Button>
                 </div>
@@ -165,7 +165,7 @@ const UnitConverter = () => {
             {aiResult && (
                  <div className="text-center space-y-2 pt-4">
                     <p className="text-muted-foreground">AI Result</p>
-                    <p className="text-2xl font-bold text-purple-600 break-all">
+                    <p className="text-2xl font-bold text-primary break-all">
                     {aiResult}
                     </p>
                 </div>
@@ -228,7 +228,7 @@ const UnitConverter = () => {
           </div>
         )}
         
-        <Button onClick={convert} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#1ABC9C' }}>
+        <Button onClick={convert} className="w-full h-12 text-lg font-bold">
             Convert
         </Button>
       </CardContent>

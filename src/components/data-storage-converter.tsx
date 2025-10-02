@@ -103,7 +103,7 @@ const DataStorageConverter = () => {
           </div>
         )}
         
-        <Button onClick={convert} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#34495E' }}>
+        <Button onClick={convert} className="w-full h-12 text-lg font-bold">
             Convert
         </Button>
       </CardContent>

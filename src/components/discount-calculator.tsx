@@ -79,7 +79,7 @@ const DiscountCalculator = () => {
           </div>
         )}
         
-        <Button onClick={calculateDiscount} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#9B59B6' }}>
+        <Button onClick={calculateDiscount} className="w-full h-12 text-lg font-bold">
             Calculate
         </Button>
       </CardContent>
