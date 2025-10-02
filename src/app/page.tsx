@@ -98,7 +98,7 @@ const SettingsScreen = () => {
                                 className="w-full bg-background text-foreground hover:bg-background/90"
                                 size="lg"
                             >
-                                Upgrade to Premium
+                                Upgrade Now for $4.99
                             </Button>
                         </Card>
                         <Button 
