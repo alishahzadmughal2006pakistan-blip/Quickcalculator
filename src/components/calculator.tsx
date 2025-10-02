@@ -147,10 +147,10 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     if(isClear || key === '+/-' || key === '%' || isUnaryOperator) variant = 'outline';
 
     const iconMap: { [key: string]: React.ReactNode } = {
-        '/': <Divide size={24} />,
-        '*': <X size={24} />,
-        '-': <Minus size={24} />,
-        '+': <Plus size={24} />,
+        '/': <Divide size={20} />,
+        '*': <X size={20} />,
+        '-': <Minus size={20} />,
+        '+': <Plus size={20} />,
     };
     
     let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-xl ${className}`;
@@ -200,47 +200,43 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
-          <div className="bg-muted text-right rounded-lg p-4 break-all">
+          <div className="bg-muted text-right rounded-lg p-3 break-all">
             <ScrollArea className="h-16 sm:h-20 mb-2">
                 <div className="flex flex-col items-end gap-1 pr-2">
                   {history.slice(0, 5).reverse().map((item, index) => (
-                    <p key={index} className={`text-muted-foreground text-xs sm:text-sm ${index === 4 ? 'font-bold' : ''}`}>
+                    <p key={index} className={`text-muted-foreground text-xs ${index === 4 ? 'font-bold' : ''}`}>
                       {item}
                     </p>
                   ))}
                 </div>
             </ScrollArea>
-            <p className="text-4xl sm:text-5xl font-light text-foreground">{displayValue}</p>
+            <p className="text-3xl sm:text-5xl font-light text-foreground">{displayValue}</p>
           </div>
 
-          <div className="grid grid-cols-5 gap-2">
-            {renderButton('√')}
-            {renderButton('x²')}
-            {renderButton('^')}
-            {renderButton('log')}
+          <div className="grid grid-cols-4 gap-2">
             {renderButton('C')}
-            
+            {renderButton('^')}
+            {renderButton('√')}
+            {renderButton('/')}
+
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
-            {renderButton('+/-', '', toggleSign)}
-            {renderButton('/')}
-
+            {renderButton('*')}
+            
             {renderButton('4')}
             {renderButton('5')}
             {renderButton('6')}
-            {renderButton('%', '', () => setDisplayValue(String(parseFloat(displayValue) / 100)))}
-            {renderButton('*')}
-
+            {renderButton('-')}
+            
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
-            {renderButton('=', 'col-start-4 row-start-4 row-span-2 h-auto')}
-            {renderButton('-')}
-            
+            {renderButton('+')}
+
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
-            {renderButton('+')}
+            {renderButton('=')}
           </div>
         </div>
       </CardContent>
