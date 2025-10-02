@@ -64,14 +64,6 @@ const UnitConverter = () => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   
-  useEffect(() => {
-    const unitKeys = Object.keys(units[category]);
-    setFromUnit(unitKeys[0]);
-    setToUnit(unitKeys[1]);
-    setValue('');
-    setResult(null);
-  }, [category]);
-
   const convert = () => {
     const numValue = parseFloat(value);
     if (isNaN(numValue)) {
@@ -111,10 +103,18 @@ const UnitConverter = () => {
   };
   
   useEffect(() => {
-    if(value) {
-        convert();
+    const unitKeys = Object.keys(units[category]);
+    setFromUnit(unitKeys[0]);
+    setToUnit(unitKeys[1]);
+    setValue('');
+    setResult(null);
+  }, [category]);
+  
+  useEffect(() => {
+    if (value) {
+      convert();
     } else {
-        setResult(null);
+      setResult(null);
     }
   }, [value, fromUnit, toUnit, category]);
 
