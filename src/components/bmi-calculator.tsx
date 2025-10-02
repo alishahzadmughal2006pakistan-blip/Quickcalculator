@@ -85,7 +85,7 @@ const BmiCalculator = () => {
   }, [weight, height, weightUnit, heightUnit]);
 
   return (
-    <Card className="w-full shadow-lg rounded-2xl">
+    <Card className="w-full shadow-lg rounded-2xl animate-fade-in-scale">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-center">BMI Calculator</CardTitle>
       </CardHeader>

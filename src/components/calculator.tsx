@@ -118,11 +118,17 @@ const BasicCalculator = ({ addToHistory, history = [] }: CalculatorProps) => {
           description: "Could not share the result at this time.",
         })
       }
-    } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(lastCalculation || '');
+    } else if (navigator.clipboard && lastCalculation) {
+        navigator.clipboard.writeText(lastCalculation);
         toast({
           title: "Result Copied!",
           description: "The calculation has been copied to your clipboard.",
+        })
+    } else {
+       toast({
+          variant: "destructive",
+          title: "Nothing to Share",
+          description: "Perform a calculation first.",
         })
     }
   };
