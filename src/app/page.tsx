@@ -51,11 +51,11 @@ export default function Home() {
               <TabsTrigger value="tools"><Wrench className="w-4 h-4 mr-1" /> Tools</TabsTrigger>
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
-            <TabsContent value="free" className="pt-4">
+            <TabsContent value="free" className="pt-4 space-y-8">
+              <div>
+                 <BasicCalculator addToHistory={handleAddToHistory} history={history} />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
-                <div className="xl:col-span-2">
-                  <BasicCalculator addToHistory={handleAddToHistory} history={history} />
-                </div>
                 <TipCalculator />
                 <BmiCalculator />
                 <PercentageCalculator />
