@@ -29,6 +29,7 @@ import {
 import DateCalculator from '@/components/date-calculator';
 import DiscountCalculator from '@/components/discount-calculator';
 import DataStorageConverter from '@/components/data-storage-converter';
+import TaxCalculator from '@/components/tax-calculator';
 
 const SplashScreen = () => (
   <div className="flex flex-col items-center justify-center h-screen w-screen bg-background animate-fade-in">
@@ -120,6 +121,7 @@ export default function Home() {
                 <LoanCalculator />
                 <CurrencyConverter />
                 <ScientificCalculator />
+                <TaxCalculator />
               </div>
             </TabsContent>
             <TabsContent value="tools" className="pt-4">
