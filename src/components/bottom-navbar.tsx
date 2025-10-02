@@ -31,7 +31,7 @@ const categories = {
 
 const MenuPopoverContent = ({ category, setActiveCalculator }: { category: 'free' | 'advanced' | 'tools', setActiveCalculator: (key: string) => void }) => {
     return (
-        <PopoverContent className="w-64 p-2">
+        <PopoverContent className="w-[90vw] max-w-sm p-2 md:w-64">
             <div className="grid gap-2">
                 {categories[category].map(item => (
                     <Button
