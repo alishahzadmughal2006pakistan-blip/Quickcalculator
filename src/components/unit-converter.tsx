@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -63,10 +64,10 @@ const UnitConverter = () => {
   const [aiResult, setAiResult] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  
-  const convert = () => {
+
+  const convert = useCallback(() => {
     const numValue = parseFloat(value);
-    if (isNaN(numValue)) {
+    if (isNaN(numValue) || !value) {
       setResult(null);
       return;
     }
@@ -100,23 +101,19 @@ const UnitConverter = () => {
     }
     
     setResult(convertedValue?.toFixed(5) ?? null);
-  };
-  
+  }, [value, fromUnit, toUnit, category]);
+
   useEffect(() => {
     const unitKeys = Object.keys(units[category]);
     setFromUnit(unitKeys[0]);
-    setToUnit(unitKeys[1]);
+    setToUnit(unitKeys.length > 1 ? unitKeys[1] : unitKeys[0]);
     setValue('');
     setResult(null);
   }, [category]);
   
   useEffect(() => {
-    if (value) {
-      convert();
-    } else {
-      setResult(null);
-    }
-  }, [value, fromUnit, toUnit, category]);
+    convert();
+  }, [convert]);
 
   const handleSwap = () => {
     const temp = fromUnit;
