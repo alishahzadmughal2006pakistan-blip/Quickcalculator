@@ -5,46 +5,105 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Divide, Minus, Plus, X } from 'lucide-react';
+import { evaluateExpression } from '@/lib/math-eval';
 
 const ScientificCalculator = () => {
+  const [expression, setExpression] = useState('0');
   const [displayValue, setDisplayValue] = useState('0');
-  
-  // Dummy functions for now
+  const [hasCalculated, setHasCalculated] = useState(false);
+
   const inputDigit = (digit: string) => {
-    setDisplayValue(prev => (prev === '0' ? digit : prev + digit));
+    if (hasCalculated) {
+      setExpression(digit);
+      setDisplayValue(digit);
+      setHasCalculated(false);
+    } else {
+      const newExpression = expression === '0' ? digit : expression + digit;
+      setExpression(newExpression);
+      setDisplayValue(newExpression);
+    }
+  };
+  
+  const inputDecimal = () => {
+    const segments = expression.split(/([+\-*/^()])/);
+    const lastSegment = segments[segments.length - 1];
+    if (!lastSegment.includes('.')) {
+      const newExpression = expression + '.';
+      setExpression(newExpression);
+      setDisplayValue(newExpression);
+    }
   };
 
   const handleOperator = (operator: string) => {
-    setDisplayValue(prev => prev + ` ${operator} `);
+    setHasCalculated(false);
+    const newExpression = `${expression} ${operator} `;
+    setExpression(newExpression);
+    setDisplayValue(newExpression);
+  };
+  
+  const handleFunction = (func: string) => {
+    if (hasCalculated) {
+      setExpression(`${func}(`);
+      setDisplayValue(`${func}(`);
+      setHasCalculated(false);
+    } else {
+       const newExpression = expression === '0' ? `${func}(` : expression + `${func}(`;
+       setExpression(newExpression);
+       setDisplayValue(newExpression);
+    }
+  }
+
+  const handleParenthesis = (paren: string) => {
+    if (hasCalculated) {
+        setExpression(paren);
+        setDisplayValue(paren);
+        setHasCalculated(false);
+    } else {
+        const newExpression = expression === '0' ? paren : expression + paren;
+        setExpression(newExpression);
+        setDisplayValue(newExpression);
+    }
   };
   
   const handleEquals = () => {
-    // In a real scenario, you'd parse and compute the expression
     try {
-        // WARNING: eval is unsafe and used for placeholder purposes only
-        const result = eval(displayValue.replace('^', '**'));
+        const result = evaluateExpression(expression);
+        if(!isFinite(result)) throw new Error("Calculation error");
         setDisplayValue(String(result));
+        setExpression(String(result));
+        setHasCalculated(true);
     } catch {
         setDisplayValue('Error');
+        setExpression('0');
+        setHasCalculated(true);
     }
   };
   
   const resetCalculator = () => {
+    setExpression('0');
     setDisplayValue('0');
+    setHasCalculated(false);
   };
 
   const renderButton = (key: string, className? : string, customClick?: () => void) => {
-    const isNumber = !isNaN(parseInt(key)) || key === '.';
-    
+    const isNumber = !isNaN(parseInt(key));
+    const isDecimal = key === '.';
+    const isOperator = ['/', '*', '-', '+', '^'].includes(key);
+    const isFunction = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt', '!'].includes(key);
+    const isParenthesis = ['(', ')'].includes(key);
+    const isEquals = key === '=';
+    const isClear = key === 'C';
+
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
-    if (['/', '*', '-', '+', '^'].includes(key) || key === '=') variant = 'default';
-    if (['C', 'sin', 'cos', 'tan', 'log', 'ln', '√', '!', '(', ')'].includes(key)) variant = 'outline';
+    if (isOperator || isEquals) variant = 'default';
+    if (isClear || isFunction || isParenthesis) variant = 'outline';
 
     const iconMap: { [key:string]: React.ReactNode } = {
         '/': <Divide size={20} />,
         '*': <X size={20} />,
         '-': <Minus size={20} />,
         '+': <Plus size={20} />,
+        'sqrt': '√',
     };
 
     return (
@@ -53,16 +112,26 @@ const ScientificCalculator = () => {
           variant={variant}
           className={`h-12 text-lg transition-transform active:scale-95 rounded-xl ${className}`}
           onClick={() => {
+            if (displayValue === "Error" && !isClear) {
+              resetCalculator();
+              return;
+            }
             if (customClick) {
                 customClick();
             } else if (isNumber) {
                 inputDigit(key);
-            } else if (key === '=') {
-                handleEquals();
-            } else if (key === 'C') {
-                resetCalculator();
-            } else {
+            } else if (isDecimal) {
+                inputDecimal();
+            } else if (isOperator) {
                 handleOperator(key);
+            } else if (isFunction) {
+                handleFunction(key);
+            } else if (isParenthesis) {
+                handleParenthesis(key);
+            } else if (isEquals) {
+                handleEquals();
+            } else if (isClear) {
+                resetCalculator();
             }
           }}
         >
@@ -90,7 +159,7 @@ const ScientificCalculator = () => {
             {renderButton('(')}
             {renderButton(')')}
             {renderButton('^')}
-            {renderButton('√')}
+            {renderButton('sqrt')}
             {renderButton('!')}
 
             {renderButton('C')}

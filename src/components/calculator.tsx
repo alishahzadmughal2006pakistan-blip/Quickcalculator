@@ -6,6 +6,7 @@ import { Divide, Minus, Plus, Share2, X } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { evaluateExpression } from '@/lib/math-eval';
 
 type CalculatorProps = {
   addToHistory: (calculation: string) => void;
@@ -13,131 +14,91 @@ type CalculatorProps = {
 };
 
 const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
+  const [expression, setExpression] = useState('0');
   const [displayValue, setDisplayValue] = useState('0');
-  const [firstOperand, setFirstOperand] = useState<number | null>(null);
-  const [operator, setOperator] = useState<string | null>(null);
-  const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false);
   const [lastCalculation, setLastCalculation] = useState<string | null>(null);
   const { toast } = useToast();
-
+  const [hasCalculated, setHasCalculated] = useState(false);
 
   const inputDigit = (digit: string) => {
-    if (waitingForSecondOperand) {
+    if (hasCalculated) {
+      setExpression(digit);
       setDisplayValue(digit);
-      setWaitingForSecondOperand(false);
+      setHasCalculated(false);
     } else {
-      setDisplayValue(displayValue === '0' ? digit : displayValue + digit);
+      const newExpression = expression === '0' ? digit : expression + digit;
+      setExpression(newExpression);
+      setDisplayValue(newExpression);
     }
   };
 
   const inputDecimal = () => {
-    if (!displayValue.includes('.')) {
-      setDisplayValue(displayValue + '.');
+    // To prevent adding multiple decimals in the same number
+    const segments = expression.split(/([+\-*/^()])/);
+    const lastSegment = segments[segments.length - 1];
+    if (!lastSegment.includes('.')) {
+      const newExpression = expression + '.';
+      setExpression(newExpression);
+      setDisplayValue(newExpression);
     }
   };
 
-  const performCalculation: { [key: string]: (a: number, b: number) => number } = {
-    '/': (first, second) => first / second,
-    '*': (first, second) => first * second,
-    '+': (first, second) => first + second,
-    '-': (first, second) => first - second,
-    '^': (first, second) => Math.pow(first, second),
+  const handleOperator = (op: string) => {
+    setHasCalculated(false);
+    // Add space around binary operators for parsing, but not for unary minus.
+    const newExpression = `${expression} ${op} `;
+    setExpression(newExpression);
+    setDisplayValue(newExpression);
   };
   
-  const finishCalculation = (calculationString: string, result: number) => {
-    addToHistory(calculationString);
-    setLastCalculation(calculationString);
-    setDisplayValue(String(result));
+  const handleParenthesis = (paren: string) => {
+    if (hasCalculated) {
+        setExpression(paren);
+        setDisplayValue(paren);
+        setHasCalculated(false);
+    } else {
+        const newExpression = expression === '0' ? paren : expression + paren;
+        setExpression(newExpression);
+        setDisplayValue(newExpression);
+    }
+  };
+
+  const handleUnaryOperation = (op: string) => {
+     if (hasCalculated) {
+      setExpression(`${op}(`);
+      setDisplayValue(`${op}(`);
+      setHasCalculated(false);
+    } else {
+       const newExpression = expression === '0' ? `${op}(` : expression + `${op}(`;
+       setExpression(newExpression);
+       setDisplayValue(newExpression);
+    }
   }
 
-  const handleOperator = (nextOperator: string) => {
-    const inputValue = parseFloat(displayValue);
-    setLastCalculation(null);
-
-    if (operator && waitingForSecondOperand) {
-      setOperator(nextOperator);
-      return;
-    }
-
-    if (firstOperand === null) {
-      setFirstOperand(inputValue);
-    } else if (operator) {
-      try {
-        const result = performCalculation[operator](firstOperand, inputValue);
-        if(!isFinite(result)) throw new Error("Calculation error");
-        const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
-        finishCalculation(calculationString, result);
-        setFirstOperand(result);
-      } catch (error) {
-        setDisplayValue("Error");
-        setFirstOperand(null);
-      }
-    }
-
-    setWaitingForSecondOperand(true);
-    setOperator(nextOperator);
-  };
-  
-  const handleUnaryOperation = (operation: string) => {
-    const inputValue = parseFloat(displayValue);
-    let result: number;
-    let calculationString = '';
-    setLastCalculation(null);
-
-    try {
-        if (operation === '√') {
-            if (inputValue < 0) throw new Error("Invalid input for square root");
-            result = Math.sqrt(inputValue);
-            calculationString = `√(${inputValue}) = ${result}`;
-        } else if (operation === 'x²') {
-            result = Math.pow(inputValue, 2);
-            calculationString = `(${inputValue})² = ${result}`;
-        } else if (operation === 'log') {
-            if(inputValue <= 0) throw new Error("Invalid input for log");
-            result = Math.log10(inputValue);
-            calculationString = `log(${inputValue}) = ${result}`;
-        } else {
-            throw new Error("Unknown operation");
-        }
-
-        if(!isFinite(result)) throw new Error("Calculation error");
-        finishCalculation(calculationString, result);
-        setFirstOperand(result);
-        setWaitingForSecondOperand(true);
-
-    } catch (e: any) {
-        setDisplayValue("Error");
-        setFirstOperand(null);
-        setOperator(null);
-        setWaitingForSecondOperand(false);
-    }
-  };
-
   const resetCalculator = () => {
+    setExpression('0');
     setDisplayValue('0');
-    setFirstOperand(null);
-    setOperator(null);
-    setWaitingForSecondOperand(false);
     setLastCalculation(null);
+    setHasCalculated(false);
   };
 
   const handleEquals = () => {
-    if (operator && firstOperand !== null) {
-      const inputValue = parseFloat(displayValue);
-       try {
-        const result = performCalculation[operator](firstOperand, inputValue);
-        if(!isFinite(result)) throw new Error("Calculation error");
-        const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
-        finishCalculation(calculationString, result);
-        setFirstOperand(null);
-        setOperator(null);
-        setWaitingForSecondOperand(false);
-      } catch (error) {
-        setDisplayValue("Error");
-        setFirstOperand(null);
-        setOperator(null);
-        setWaitingForSecondOperand(false);
-      }
+    try {
+      const result = evaluateExpression(expression);
+      if (!isFinite(result)) throw new Error("Calculation error");
+      
+      const calculationString = `${expression} = ${result}`;
+      addToHistory(calculationString);
+      setLastCalculation(calculationString);
+      
+      setDisplayValue(String(result));
+      setExpression(String(result));
+      setHasCalculated(true);
+
+    } catch (error) {
+      setDisplayValue("Error");
+      setExpression("0");
+      setHasCalculated(true);
     }
   };
 
@@ -164,23 +125,25 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     }
   };
 
-  
   const renderButton = (key: string, className? : string, customClick?: () => void) => {
-    const isNumber = !isNaN(parseInt(key)) || key === '.';
+    const isNumber = !isNaN(parseInt(key));
+    const isDecimal = key === '.';
     const isBinaryOperator = ['/', '*', '-', '+', '^'].includes(key);
     const isUnaryOperator = ['√', 'x²', 'log'].includes(key);
+    const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
     
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
     if(isBinaryOperator || isEquals) variant = 'default';
-    if(isClear || key === '+/-' || key === '%' || isUnaryOperator) variant = 'outline';
+    if(isClear || isUnaryOperator || isParenthesis) variant = 'outline';
 
     const iconMap: { [key:string]: React.ReactNode } = {
         '/': <Divide size={20} />,
         '*': <X size={20} />,
         '-': <Minus size={20} />,
         '+': <Plus size={20} />,
+        'x²': 'x²', // Cannot be an icon, needs to be rendered as text.
     };
     
     let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-xl ${className}`;
@@ -192,21 +155,24 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
           size="lg"
           className={finalClassName}
           onClick={() => {
-            if(customClick) {
-              customClick();
-              return;
-            }
             if (displayValue === "Error" && !isClear) {
               resetCalculator();
+              return;
             }
-            if (isNumber) {
-              if (key === '.') inputDecimal();
-              else inputDigit(key);
+            if (customClick) {
+              customClick();
+            } else if (isNumber) {
+              inputDigit(key);
+            } else if(isDecimal) {
+              inputDecimal();
             } else if (isBinaryOperator) {
               handleOperator(key);
             } else if (isUnaryOperator) {
-              handleUnaryOperation(key);
-            } else if (isEquals) {
+              handleUnaryOperation(key === '√' ? 'sqrt' : key);
+            } else if (isParenthesis) {
+              handleParenthesis(key);
+            }
+            else if (isEquals) {
               handleEquals();
             } else if (isClear) {
               resetCalculator();
@@ -249,34 +215,34 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
           </div>
 
           <div className="grid grid-cols-4 gap-2">
-            {renderButton('C')}
-            {renderButton('^')}
-            {renderButton('√')}
-            {renderButton('/')}
+            {renderButton('C', '', resetCalculator)}
+            {renderButton('^', '', () => handleOperator('^'))}
+            {renderButton('√', '', () => handleUnaryOperation('sqrt'))}
+            {renderButton('/', '', () => handleOperator('/'))}
 
-            {renderButton('x²')}
-            {renderButton('log')}
-            {renderButton('(')}
-            {renderButton(')')}
+            {renderButton('x²', '', () => handleOperator('^2'))}
+            {renderButton('log', '', () => handleUnaryOperation('log'))}
+            {renderButton('(', '', () => handleParenthesis('('))}
+            {renderButton(')', '', () => handleParenthesis(')'))}
             
-            {renderButton('7')}
-            {renderButton('8')}
-            {renderButton('9')}
-            {renderButton('*')}
+            {renderButton('7', '', () => inputDigit('7'))}
+            {renderButton('8', '', () => inputDigit('8'))}
+            {renderButton('9', '', () => inputDigit('9'))}
+            {renderButton('*', '', () => handleOperator('*'))}
             
-            {renderButton('4')}
-            {renderButton('5')}
-            {renderButton('6')}
-            {renderButton('-')}
+            {renderButton('4', '', () => inputDigit('4'))}
+            {renderButton('5', '', () => inputDigit('5'))}
+            {renderButton('6', '', () => inputDigit('6'))}
+            {renderButton('-', '', () => handleOperator('-'))}
             
-            {renderButton('1')}
-            {renderButton('2')}
-            {renderButton('3')}
-            {renderButton('+')}
+            {renderButton('1', '', () => inputDigit('1'))}
+            {renderButton('2', '', () => inputDigit('2'))}
+            {renderButton('3', '', () => inputDigit('3'))}
+            {renderButton('+', '', () => handleOperator('+'))}
 
-            {renderButton('0', 'col-span-2')}
-            {renderButton('.')}
-            {renderButton('=')}
+            {renderButton('0', 'col-span-2', () => inputDigit('0'))}
+            {renderButton('.', '', inputDecimal)}
+            {renderButton('=', '', handleEquals)}
           </div>
         </div>
       </CardContent>
