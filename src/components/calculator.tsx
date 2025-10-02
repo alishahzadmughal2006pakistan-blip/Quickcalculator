@@ -7,6 +7,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { evaluateExpression } from '@/lib/math-eval';
+import { useSound } from '@/hooks/use-sound';
 
 type CalculatorProps = {
   addToHistory: (calculation: string) => void;
@@ -19,6 +20,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   const [lastCalculation, setLastCalculation] = useState<string | null>(null);
   const { toast } = useToast();
   const [hasCalculated, setHasCalculated] = useState(false);
+  const playClickSound = useSound('/sounds/click.mp3');
 
   const inputDigit = (digit: string) => {
     if (hasCalculated) {
@@ -132,6 +134,11 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     setDisplayValue(newExpression);
   }
 
+  const handleButtonClick = (action: () => void) => {
+    playClickSound();
+    action();
+  }
+
   const renderButton = (key: string, className? : string, customClick?: () => void, customStyle?: React.CSSProperties) => {
     const isNumber = !isNaN(parseInt(key));
     const isDecimal = key === '.';
@@ -160,6 +167,33 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     
     let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-xl ${className}`;
 
+    const clickAction = () => {
+        if (displayValue === "Error" && !isClear) {
+            resetCalculator();
+            return;
+        }
+        if (customClick) {
+            customClick();
+        } else if (isNumber) {
+            inputDigit(key);
+        } else if(isDecimal) {
+            inputDecimal();
+        } else if (isBinaryOperator) {
+            handleOperator(key);
+        } else if (isUnaryOperator) {
+            handleUnaryOperation(key === '√' ? 'sqrt' : 'log');
+        } else if (isSquare) {
+            handleSquare();
+        } else if (isParenthesis) {
+            handleParenthesis(key);
+        }
+        else if (isEquals) {
+            handleEquals();
+        } else if (isClear) {
+            resetCalculator();
+        }
+    }
+
     return (
         <Button
           key={key}
@@ -167,32 +201,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
           size="lg"
           className={finalClassName}
           style={style}
-          onClick={() => {
-            if (displayValue === "Error" && !isClear) {
-              resetCalculator();
-              return;
-            }
-            if (customClick) {
-              customClick();
-            } else if (isNumber) {
-              inputDigit(key);
-            } else if(isDecimal) {
-              inputDecimal();
-            } else if (isBinaryOperator) {
-              handleOperator(key);
-            } else if (isUnaryOperator) {
-              handleUnaryOperation(key === '√' ? 'sqrt' : 'log');
-            } else if (isSquare) {
-              handleSquare();
-            } else if (isParenthesis) {
-              handleParenthesis(key);
-            }
-            else if (isEquals) {
-              handleEquals();
-            } else if (isClear) {
-              resetCalculator();
-            }
-          }}
+          onClick={() => handleButtonClick(clickAction)}
         >
           {iconMap[key] || key}
         </Button>
@@ -221,7 +230,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
                 variant="ghost"
                 size="icon"
                 className="absolute top-1 left-1 h-8 w-8"
-                onClick={handleShare}
+                onClick={() => handleButtonClick(handleShare)}
               >
                 <Share2 className="h-5 w-5" />
               </Button>

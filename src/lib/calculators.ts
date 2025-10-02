@@ -11,9 +11,11 @@ import InvestmentReturnCalculator from '@/components/investment-return-calculato
 import DateCalculator from '@/components/date-calculator';
 import DiscountCalculator from '@/components/discount-calculator';
 import DataStorageConverter from '@/components/data-storage-converter';
+import BasicCalculator from '@/components/calculator';
 import type { ComponentType } from 'react';
 
 export const allCalculators: { key: string, component: ComponentType<any>, title: string, category: string }[] = [
+  { key: 'home', component: BasicCalculator, title: "Basic Calculator", category: 'free' },
   { key: 'tip', component: TipCalculator, title: "Tip Calculator", category: 'free' },
   { key: 'bmi', component: BmiCalculator, title: "BMI Calculator", category: 'free' },
   { key: 'percentage', component: PercentageCalculator, title: "Percentage Calculator", category: 'free' },
