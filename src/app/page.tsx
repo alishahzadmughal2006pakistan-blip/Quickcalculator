@@ -6,6 +6,7 @@ import { Calculator, LayoutGrid, Wrench, Settings } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import TipCalculator from '@/components/tip-calculator';
 import BmiCalculator from '@/components/bmi-calculator';
+import PercentageCalculator from '@/components/percentage-calculator';
 
 export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
@@ -34,6 +35,7 @@ export default function Home() {
                 <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 <TipCalculator />
                 <BmiCalculator />
+                <PercentageCalculator />
               </div>
             </TabsContent>
             <TabsContent value="advanced" className="pt-4">
