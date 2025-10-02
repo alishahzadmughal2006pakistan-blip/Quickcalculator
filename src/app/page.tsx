@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, LayoutGrid, Wrench, Settings } from 'lucide-react';
+import { Calculator, LayoutGrid, Wrench, Settings, Trash2 } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import TipCalculator from '@/components/tip-calculator';
 import BmiCalculator from '@/components/bmi-calculator';
@@ -11,6 +11,18 @@ import AgeCalculator from '@/components/age-calculator';
 import UnitConverter from '@/components/unit-converter';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
@@ -18,6 +30,10 @@ export default function Home() {
   const handleAddToHistory = (calculation: string) => {
     // Add to history, keeping a max of 50 entries
     setHistory(prev => [calculation, ...prev.slice(0, 49)]);
+  };
+
+  const handleClearHistory = () => {
+    setHistory([]);
   };
 
   return (
@@ -61,6 +77,26 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                         <Label htmlFor="theme-toggle">Dark Mode</Label>
                         <ThemeToggle />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Calculation History</Label>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm"><Trash2 className="mr-2 h-4 w-4" /> Clear History</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your calculation history.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleClearHistory}>Continue</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                 </CardContent>
                </Card>
