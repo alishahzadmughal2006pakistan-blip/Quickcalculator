@@ -124,26 +124,33 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
         })
     }
   };
+  
+  const handleSquare = () => {
+    setHasCalculated(false);
+    const newExpression = `(${expression})^2`;
+    setExpression(newExpression);
+    setDisplayValue(newExpression);
+  }
 
   const renderButton = (key: string, className? : string, customClick?: () => void) => {
     const isNumber = !isNaN(parseInt(key));
     const isDecimal = key === '.';
     const isBinaryOperator = ['/', '*', '-', '+', '^'].includes(key);
-    const isUnaryOperator = ['√', 'x²', 'log'].includes(key);
+    const isUnaryOperator = ['√', 'log'].includes(key);
+    const isSquare = key === 'x²';
     const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
     
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
     if(isBinaryOperator || isEquals) variant = 'default';
-    if(isClear || isUnaryOperator || isParenthesis) variant = 'outline';
+    if(isClear || isUnaryOperator || isParenthesis || isSquare) variant = 'outline';
 
     const iconMap: { [key:string]: React.ReactNode } = {
         '/': <Divide size={20} />,
         '*': <X size={20} />,
         '-': <Minus size={20} />,
         '+': <Plus size={20} />,
-        'x²': 'x²', // Cannot be an icon, needs to be rendered as text.
     };
     
     let finalClassName = `h-14 sm:h-16 text-xl sm:text-2xl transition-transform active:scale-95 rounded-xl ${className}`;
@@ -168,7 +175,9 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
             } else if (isBinaryOperator) {
               handleOperator(key);
             } else if (isUnaryOperator) {
-              handleUnaryOperation(key === '√' ? 'sqrt' : key);
+              handleUnaryOperation(key === '√' ? 'sqrt' : 'log');
+            } else if (isSquare) {
+              handleSquare();
             } else if (isParenthesis) {
               handleParenthesis(key);
             }
@@ -216,33 +225,33 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
 
           <div className="grid grid-cols-4 gap-2">
             {renderButton('C', '', resetCalculator)}
-            {renderButton('^', '', () => handleOperator('^'))}
-            {renderButton('√', '', () => handleUnaryOperation('sqrt'))}
-            {renderButton('/', '', () => handleOperator('/'))}
+            {renderButton('^')}
+            {renderButton('√')}
+            {renderButton('/')}
 
-            {renderButton('x²', '', () => handleOperator('^2'))}
-            {renderButton('log', '', () => handleUnaryOperation('log'))}
-            {renderButton('(', '', () => handleParenthesis('('))}
-            {renderButton(')', '', () => handleParenthesis(')'))}
+            {renderButton('x²')}
+            {renderButton('log')}
+            {renderButton('(')}
+            {renderButton(')')}
             
-            {renderButton('7', '', () => inputDigit('7'))}
-            {renderButton('8', '', () => inputDigit('8'))}
-            {renderButton('9', '', () => inputDigit('9'))}
-            {renderButton('*', '', () => handleOperator('*'))}
+            {renderButton('7')}
+            {renderButton('8')}
+            {renderButton('9')}
+            {renderButton('*')}
             
-            {renderButton('4', '', () => inputDigit('4'))}
-            {renderButton('5', '', () => inputDigit('5'))}
-            {renderButton('6', '', () => inputDigit('6'))}
-            {renderButton('-', '', () => handleOperator('-'))}
+            {renderButton('4')}
+            {renderButton('5')}
+            {renderButton('6')}
+            {renderButton('-')}
             
-            {renderButton('1', '', () => inputDigit('1'))}
-            {renderButton('2', '', () => inputDigit('2'))}
-            {renderButton('3', '', () => inputDigit('3'))}
-            {renderButton('+', '', () => handleOperator('+'))}
+            {renderButton('1')}
+            {renderButton('2')}
+            {renderButton('3')}
+            {renderButton('+')}
 
-            {renderButton('0', 'col-span-2', () => inputDigit('0'))}
-            {renderButton('.', '', inputDecimal)}
-            {renderButton('=', '', handleEquals)}
+            {renderButton('0', 'col-span-2')}
+            {renderButton('.')}
+            {renderButton('=')}
           </div>
         </div>
       </CardContent>

@@ -85,18 +85,26 @@ const ScientificCalculator = () => {
     setHasCalculated(false);
   };
 
+  const handleFactorial = () => {
+      setHasCalculated(false);
+      const newExpression = `fact(${expression})`;
+      setExpression(newExpression);
+      setDisplayValue(newExpression);
+  }
+
   const renderButton = (key: string, className? : string, customClick?: () => void) => {
     const isNumber = !isNaN(parseInt(key));
     const isDecimal = key === '.';
     const isOperator = ['/', '*', '-', '+', '^'].includes(key);
-    const isFunction = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt', '!'].includes(key);
+    const isFunction = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'].includes(key);
+    const isFactorial = key === '!';
     const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
 
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'secondary';
     if (isOperator || isEquals) variant = 'default';
-    if (isClear || isFunction || isParenthesis) variant = 'outline';
+    if (isClear || isFunction || isParenthesis || isFactorial) variant = 'outline';
 
     const iconMap: { [key:string]: React.ReactNode } = {
         '/': <Divide size={20} />,
@@ -126,6 +134,8 @@ const ScientificCalculator = () => {
                 handleOperator(key);
             } else if (isFunction) {
                 handleFunction(key);
+            } else if (isFactorial) {
+                handleFactorial();
             } else if (isParenthesis) {
                 handleParenthesis(key);
             } else if (isEquals) {
@@ -162,26 +172,28 @@ const ScientificCalculator = () => {
             {renderButton('sqrt')}
             {renderButton('!')}
 
-            {renderButton('C')}
+            {renderButton('C', '', resetCalculator)}
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
             {renderButton('/')}
-
+            
             {renderButton('4')}
             {renderButton('5')}
             {renderButton('6')}
             {renderButton('*')}
+            {renderButton(' ')} 
             
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
             {renderButton('-')}
+            {renderButton(' ')}
 
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
-            {renderButton('=')}
-            {renderButton('+')}
+            {renderButton('=', '', handleEquals)}
+            {renderButton('+', '', () => handleOperator('+'))}
         </div>
       </CardContent>
     </Card>

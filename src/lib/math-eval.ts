@@ -9,38 +9,8 @@ const precedence: { [key: string]: number } = {
   '^': 3,
 };
 
-const applyOp = (operators: string[], values: number[]): void => {
-  const operator = operators.pop();
-  const right = values.pop();
-  const left = values.pop();
-
-  if (operator === undefined || right === undefined || left === undefined) {
-    throw new Error('Invalid expression');
-  }
-
-  switch (operator) {
-    case '+':
-      values.push(left + right);
-      break;
-    case '-':
-      values.push(left - right);
-      break;
-    case '*':
-      values.push(left * right);
-      break;
-    case '/':
-      if (right === 0) throw new Error('Division by zero');
-      values.push(left / right);
-      break;
-    case '^':
-      values.push(Math.pow(left, right));
-      break;
-  }
-};
-
-
 const factorial = (n: number): number => {
-    if (n < 0) throw new Error("Factorial not defined for negative numbers");
+    if (n < 0 || !Number.isInteger(n)) throw new Error("Factorial not defined for non-integers or negative numbers");
     if (n === 0) return 1;
     let result = 1;
     for (let i = 2; i <= n; i++) {
@@ -60,66 +30,90 @@ const functions: { [key: string]: (n: number) => number } = {
 };
 
 
-export const evaluateExpression = (expression: string): number => {
-  // Pre-process for functions and clean up
-  let tokens = expression
-    .replace(/\s+/g, '')
-    .replace(/(\d+)!/g, 'fact($1)') // convert n! to fact(n)
-    .split(/([+\-*/^()])/);
+const applyOp = (operators: string[], values: number[]): void => {
+  const op = operators.pop();
+  if (op === undefined) throw new Error('Invalid expression: Operator expected.');
+  
+  if (op in functions) {
+    const arg = values.pop();
+    if (arg === undefined) throw new Error(`Invalid expression: Argument missing for ${op}.`);
+    values.push(functions[op](arg));
+  } else {
+    const right = values.pop();
+    const left = values.pop();
 
+    if (right === undefined || left === undefined) {
+      throw new Error('Invalid expression: Operand missing.');
+    }
 
-  const values: number[] = [];
-  const operators: string[] = [];
-
-  const functionStack: { name: string, argCount: number }[] = [];
-
-  for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i].trim();
-    if (!token) continue;
-
-    if (!isNaN(parseFloat(token))) {
-      values.push(parseFloat(token));
-    } else if (token in functions) {
-        operators.push(token);
-    } else if (token === '(') {
-      operators.push(token);
-    } else if (token === ')') {
-      while (operators[operators.length - 1] !== '(') {
-        if (operators.length === 0) throw new Error("Mismatched parentheses");
-        applyOp(operators, values);
-      }
-      operators.pop(); // Pop '('.
-
-      // Check if the '(' was part of a function call
-      const lastOp = operators[operators.length - 1];
-      if (lastOp in functions) {
-          const funcName = operators.pop() as string;
-          const arg = values.pop();
-          if (arg === undefined) throw new Error(`Argument missing for function ${funcName}`);
-          values.push(functions[funcName](arg));
-      }
-    } else if (token in precedence) {
-      while (
-        operators.length > 0 &&
-        operators[operators.length - 1] in precedence &&
-        precedence[operators[operators.length - 1]] >= precedence[token]
-      ) {
-        applyOp(operators, values);
-      }
-      operators.push(token);
-    } else {
-        throw new Error(`Unknown token: ${token}`);
+    switch (op) {
+      case '+': values.push(left + right); break;
+      case '-': values.push(left - right); break;
+      case '*': values.push(left * right); break;
+      case '/':
+        if (right === 0) throw new Error('Division by zero');
+        values.push(left / right);
+        break;
+      case '^': values.push(Math.pow(left, right)); break;
+      default: throw new Error(`Unknown operator: ${op}`);
     }
   }
+};
 
-  while (operators.length > 0) {
-    if (operators[operators.length - 1] === '(') throw new Error("Mismatched parentheses");
-    applyOp(operators, values);
-  }
 
-  if (values.length !== 1 || operators.length !== 0) {
-    throw new Error('Invalid expression');
-  }
+export const evaluateExpression = (expression: string): number => {
+    // Standardize function calls e.g. sqrt(9) not sqrt 9
+    let processedExpression = expression.replace(/(\w+)\s*\(([^)]*)\)/g, '$1($2)');
 
-  return values[0];
+    // Tokenize, keeping numbers, operators, and parentheses
+    const tokens = processedExpression.match(/(\d+\.?\d*|\.\d+|[+\-*/^()]|\w+)/g);
+    if (!tokens) throw new Error("Invalid characters in expression");
+
+    const values: number[] = [];
+    const operators: string[] = [];
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        if (!isNaN(parseFloat(token))) {
+            values.push(parseFloat(token));
+        } else if (token in functions) {
+            operators.push(token);
+        } else if (token === '(') {
+            operators.push(token);
+        } else if (token === ')') {
+            while (operators.length > 0 && operators[operators.length - 1] !== '(') {
+                applyOp(operators, values);
+            }
+            if (operators.length === 0) throw new Error("Mismatched parentheses");
+            operators.pop(); // Pop '('
+
+            // If the op before '(' was a function, apply it
+            if (operators.length > 0 && operators[operators.length - 1] in functions) {
+                applyOp(operators, values);
+            }
+        } else if (token in precedence) {
+            while (
+                operators.length > 0 &&
+                operators[operators.length - 1] !== '(' &&
+                precedence[operators[operators.length - 1]] >= precedence[token]
+            ) {
+                applyOp(operators, values);
+            }
+            operators.push(token);
+        } else {
+            throw new Error(`Unknown token: ${token}`);
+        }
+    }
+
+    while (operators.length > 0) {
+        if (operators[operators.length - 1] === '(') throw new Error("Mismatched parentheses");
+        applyOp(operators, values);
+    }
+
+    if (values.length !== 1 || operators.length !== 0) {
+        throw new Error('Invalid expression format');
+    }
+
+    return values[0];
 };
