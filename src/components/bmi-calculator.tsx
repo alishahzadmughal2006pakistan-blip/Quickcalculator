@@ -124,7 +124,7 @@ const BmiCalculator = () => {
           </div>
         )}
         
-        <Button onClick={calculateBmi} className="w-full h-12 text-lg font-bold bg-[#4A90E2] hover:bg-[#4A90E2]/90 text-white">
+        <Button onClick={calculateBmi} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#4A90E2' }}>
             Calculate
         </Button>
       </CardContent>

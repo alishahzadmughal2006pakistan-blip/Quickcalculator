@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useTransition, useCallback } from 'react';
@@ -229,7 +228,7 @@ const UnitConverter = () => {
           </div>
         )}
         
-        <Button onClick={convert} className="w-full h-12 text-lg font-bold bg-[#1ABC9C] hover:bg-[#1ABC9C]/90 text-white">
+        <Button onClick={convert} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#1ABC9C' }}>
             Convert
         </Button>
       </CardContent>

@@ -111,7 +111,7 @@ const TipCalculator = () => {
           </div>
         </div>
         
-        <Button onClick={calculateTip} className="w-full h-12 text-lg font-bold bg-[#27AE60] hover:bg-[#27AE60]/90 text-white">
+        <Button onClick={calculateTip} className="w-full h-12 text-lg font-bold text-white" style={{ backgroundColor: '#27AE60' }}>
             Recalculate
         </Button>
       </CardContent>
