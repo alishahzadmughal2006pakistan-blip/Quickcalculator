@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Gem, Pin, PinOff, Trash2, History } from 'lucide-react';
+import { Gem, Pin, PinOff, Trash2, History, FileText } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { BannerAd } from '@/components/banner-ad';
 import SplashScreen from '@/components/splash-screen';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
@@ -94,6 +95,14 @@ const SettingsScreen = () => {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                     </AlertDialog>
+                </div>
+                 <div className="border-t pt-4">
+                    <Link href="/privacy" passHref>
+                         <Button variant="outline" className="w-full justify-start">
+                            <FileText className="mr-2 h-4 w-4" />
+                            Privacy Policy
+                        </Button>
+                    </Link>
                 </div>
                 {!isPremium && (
                     <div className="border-t pt-4 space-y-4">
