@@ -1,8 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calculator, LayoutGrid, Wrench, Settings, Trash2 } from 'lucide-react';
+import { Calculator, LayoutGrid, Wrench, Settings, Trash2, Atom } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import TipCalculator from '@/components/tip-calculator';
 import BmiCalculator from '@/components/bmi-calculator';
@@ -25,8 +25,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+const SplashScreen = () => (
+  <div className="flex flex-col items-center justify-center h-screen w-screen bg-background animate-fade-in">
+    <div className="flex items-center space-x-4">
+      <Atom className="w-16 h-16 text-primary" />
+      <h1 className="text-5xl font-bold text-primary">Quick Calculator+</h1>
+    </div>
+  </div>
+);
+
+
 export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
   
   const handleAddToHistory = (calculation: string) => {
     // Add to history, keeping a max of 50 entries
@@ -36,6 +52,10 @@ export default function Home() {
   const handleClearHistory = () => {
     setHistory([]);
   };
+
+  if (loading) {
+    return <SplashScreen />;
+  }
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-2 sm:p-4 font-body">
@@ -52,16 +72,16 @@ export default function Home() {
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="free" className="pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                 <div className="lg:col-span-1">
                    <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:col-span-2 gap-4 sm:gap-8 md:grid-flow-row">
-                    <div className="md:col-span-2 lg:col-span-1"><TipCalculator /></div>
-                    <div className="md:col-span-1"><BmiCalculator /></div>
-                    <div className="md:col-span-1"><PercentageCalculator /></div>
-                    <div className="md:col-span-1"><AgeCalculator /></div>
-                    <div className="md:col-span-1"><UnitConverter /></div>
+                <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:col-span-2">
+                    <TipCalculator />
+                    <BmiCalculator />
+                    <PercentageCalculator />
+                    <AgeCalculator />
+                    <UnitConverter />
                 </div>
               </div>
             </TabsContent>
