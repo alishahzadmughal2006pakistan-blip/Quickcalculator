@@ -2,20 +2,19 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Divide, Minus, Plus, X, Percent } from 'lucide-react';
+import { Divide, Minus, Plus, X } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 type CalculatorProps = {
   addToHistory: (calculation: string) => void;
+  history: string[];
 };
 
-const Calculator = ({ addToHistory }: CalculatorProps) => {
+const Calculator = ({ addToHistory, history }: CalculatorProps) => {
   const [displayValue, setDisplayValue] = useState('0');
   const [firstOperand, setFirstOperand] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false);
-  const [advancedMode, setAdvancedMode] = useState(false);
 
   const inputDigit = (digit: string) => {
     if (waitingForSecondOperand) {
@@ -32,12 +31,11 @@ const Calculator = ({ addToHistory }: CalculatorProps) => {
     }
   };
 
-  const performCalculation = {
-    '/': (first: number, second: number) => first / second,
-    '*': (first: number, second: number) => first * second,
-    '+': (first: number, second: number) => first + second,
-    '-': (first: number, second: number) => first - second,
-    'xʸ': (first: number, second: number) => Math.pow(first, second),
+  const performCalculation: { [key: string]: (a: number, b: number) => number } = {
+    '/': (first, second) => first / second,
+    '*': (first, second) => first * second,
+    '+': (first, second) => first + second,
+    '-': (first, second) => first - second,
   };
 
   const handleOperator = (nextOperator: string) => {
@@ -51,7 +49,7 @@ const Calculator = ({ addToHistory }: CalculatorProps) => {
     if (firstOperand === null) {
       setFirstOperand(inputValue);
     } else if (operator) {
-      const result = performCalculation[operator as keyof typeof performCalculation](firstOperand, inputValue);
+      const result = performCalculation[operator](firstOperand, inputValue);
       const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
       addToHistory(calculationString);
       setDisplayValue(String(result));
@@ -72,70 +70,39 @@ const Calculator = ({ addToHistory }: CalculatorProps) => {
   const handleEquals = () => {
     if (operator && firstOperand !== null) {
       const inputValue = parseFloat(displayValue);
-      const result = performCalculation[operator as keyof typeof performCalculation](firstOperand, inputValue);
+      const result = performCalculation[operator](firstOperand, inputValue);
       const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
       addToHistory(calculationString);
       setDisplayValue(String(result));
       setFirstOperand(null);
       setOperator(null);
-      setWaitingForSecondOperand(true); // Ready for new calculation
+      setWaitingForSecondOperand(false);
     }
   };
   
-  const handleUnaryOperator = (op: string) => {
-    const inputValue = parseFloat(displayValue);
-    let result = inputValue;
-    let calculationString = '';
-
-    switch(op) {
-        case '±':
-            result = inputValue * -1;
-            break;
-        case '%':
-            result = inputValue / 100;
-            calculationString = `${inputValue}% = ${result}`;
-            break;
-        case '√':
-            result = Math.sqrt(inputValue);
-            calculationString = `√(${inputValue}) = ${result}`;
-            break;
-        case 'log':
-            result = Math.log10(inputValue);
-            calculationString = `log(${inputValue}) = ${result}`;
-            break;
-    }
-    
-    if (calculationString) {
-        addToHistory(calculationString);
-    }
-    setDisplayValue(String(result));
-  }
-
   const renderButton = (key: string) => {
     const isNumber = !isNaN(parseInt(key)) || key === '.';
-    const isOperator = ['/', '*', '-', '+', 'xʸ'].includes(key);
+    const isOperator = ['/', '*', '-', '+'].includes(key);
     const isEquals = key === '=';
-    const isAC = key === 'AC';
+    const isClear = key === 'Clear';
     
     let variant: 'default' | 'secondary' | 'outline' = 'secondary';
-    if(isOperator) variant = 'outline';
-    if(isEquals) variant = 'default';
+    if(isOperator || isEquals) variant = 'default';
+    if(isClear) variant = 'destructive';
 
     const iconMap: { [key: string]: React.ReactNode } = {
-        '/': <Divide />,
-        '*': <X />,
-        '-': <Minus />,
-        '+': <Plus />,
-        '%': <Percent />,
-        '±': <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/><path d="M5 12h14"/></svg>,
+        '/': <Divide size={28} />,
+        '*': <X size={28} />,
+        '-': <Minus size={28} />,
+        '+': <Plus size={28} />,
     };
 
     return (
         <Button
           key={key}
-          variant={variant}
+          variant={isOperator || isEquals ? 'default' : isClear ? 'destructive' : 'secondary'}
           size="lg"
-          className={`h-16 text-2xl transition-transform active:scale-95 ${isEquals ? 'col-span-2' : ''} ${isAC ? 'text-destructive hover:text-destructive' : ''}`}
+          className={`h-20 text-3xl transition-transform active:scale-95 rounded-full ${isEquals || key === '0' ? 'col-span-2' : ''}`}
           onClick={() => {
             if (isNumber) {
               if (key === '.') inputDecimal();
@@ -144,10 +111,8 @@ const Calculator = ({ addToHistory }: CalculatorProps) => {
               handleOperator(key);
             } else if (isEquals) {
               handleEquals();
-            } else if (isAC) {
+            } else if (isClear) {
               resetCalculator();
-            } else {
-              handleUnaryOperator(key);
             }
           }}
         >
@@ -159,26 +124,22 @@ const Calculator = ({ addToHistory }: CalculatorProps) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-muted text-right rounded-lg p-4 break-all">
-        <p className="text-5xl font-code text-foreground">{displayValue}</p>
+        <ScrollArea className="h-20 mb-2">
+            <div className="flex flex-col items-end gap-1 pr-2">
+              {history.slice(0, 5).reverse().map((item, index) => (
+                <p key={index} className={`text-muted-foreground text-sm ${index === 4 ? 'font-bold' : ''}`}>
+                  {item}
+                </p>
+              ))}
+            </div>
+        </ScrollArea>
+        <p className="text-6xl font-light text-foreground">{displayValue}</p>
       </div>
-
-      <div className="flex justify-end items-center gap-2">
-        <Label htmlFor="advanced-mode" className="text-sm">Advanced</Label>
-        <Switch id="advanced-mode" checked={advancedMode} onCheckedChange={setAdvancedMode}/>
-      </div>
-
-      {advancedMode && (
-        <div className="grid grid-cols-4 gap-2">
-            {['xʸ', 'log', '√', '%'].map(key => renderButton(key))}
-        </div>
-      )}
 
       <div className="grid grid-cols-4 gap-2">
-        {renderButton('AC')}
-        {renderButton('±')}
+        {renderButton('Clear')}
         {renderButton('/')}
-        {['7', '8', '9', '*', '4', '5', '6', '-', '1', '2', '3', '+', '0'].map(key => renderButton(key))}
-        {renderButton('.')}
+        {['7', '8', '9', '*', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.'].map(key => renderButton(key))}
         {renderButton('=')}
       </div>
     </div>
