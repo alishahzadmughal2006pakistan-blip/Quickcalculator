@@ -6,11 +6,18 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { Divide, Minus, Plus, X } from 'lucide-react';
 import { evaluateExpression } from '@/lib/math-eval';
+import { useSound } from '@/hooks/use-sound';
 
 const ScientificCalculator = () => {
   const [expression, setExpression] = useState('0');
   const [displayValue, setDisplayValue] = useState('0');
   const [hasCalculated, setHasCalculated] = useState(false);
+  const playClickSound = useSound('/sounds/click.mp3');
+
+  const handleButtonClick = (action: () => void) => {
+    playClickSound();
+    action();
+  };
 
   const inputDigit = (digit: string) => {
     if (hasCalculated) {
@@ -97,14 +104,15 @@ const ScientificCalculator = () => {
     const isDecimal = key === '.';
     const isOperator = ['/', '*', '-', '+', '^'].includes(key);
     const isFunction = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'].includes(key);
-    const isFactorial = key === '!';
+    const isFactorial = key === 'x!';
     const isParenthesis = ['(', ')'].includes(key);
     const isEquals = key === '=';
     const isClear = key === 'C';
+    const isSquare = key === 'x²';
 
     let variant: 'default' | 'secondary' | 'outline' | 'destructive' | 'ghost' = 'secondary';
     if (isOperator || isEquals) variant = 'default';
-    if (isClear || isFunction || isParenthesis || isFactorial) variant = 'outline';
+    if (isClear || isFunction || isParenthesis || isFactorial || isSquare) variant = 'outline';
 
 
     const iconMap: { [key:string]: React.ReactNode } = {
@@ -114,6 +122,39 @@ const ScientificCalculator = () => {
         '+': <Plus size={20} />,
         'sqrt': '√',
     };
+    
+    let clickAction = () => {};
+
+    if (customClick) {
+        clickAction = customClick;
+    } else if (isNumber) {
+        clickAction = () => inputDigit(key);
+    } else if (isDecimal) {
+        clickAction = inputDecimal;
+    } else if (isOperator) {
+        clickAction = () => handleOperator(key);
+    } else if (isFunction) {
+        clickAction = () => handleFunction(key);
+    } else if (isFactorial) {
+        clickAction = handleFactorial;
+    } else if (isSquare) {
+        clickAction = () => handleOperator('^2');
+    } else if (isParenthesis) {
+        clickAction = () => handleParenthesis(key);
+    } else if (isEquals) {
+        clickAction = handleEquals;
+    } else if (isClear) {
+        clickAction = resetCalculator;
+    }
+
+    const finalClickAction = () => {
+        if (displayValue === "Error" && !isClear) {
+            resetCalculator();
+        } else {
+            clickAction();
+        }
+    }
+
 
     return (
         <Button
@@ -121,31 +162,7 @@ const ScientificCalculator = () => {
           variant={variant}
           className={`h-12 text-lg transition-transform active:scale-95 rounded-xl ${className}`}
           style={customStyle}
-          onClick={() => {
-            if (displayValue === "Error" && !isClear) {
-              resetCalculator();
-              return;
-            }
-            if (customClick) {
-                customClick();
-            } else if (isNumber) {
-                inputDigit(key);
-            } else if (isDecimal) {
-                inputDecimal();
-            } else if (isOperator) {
-                handleOperator(key);
-            } else if (isFunction) {
-                handleFunction(key);
-            } else if (isFactorial) {
-                handleFactorial();
-            } else if (isParenthesis) {
-                handleParenthesis(key);
-            } else if (isEquals) {
-                handleEquals();
-            } else if (isClear) {
-                resetCalculator();
-            }
-          }}
+          onClick={() => handleButtonClick(finalClickAction)}
         >
           {iconMap[key] || key}
         </Button>
@@ -167,33 +184,34 @@ const ScientificCalculator = () => {
             {renderButton('tan')}
             {renderButton('log')}
             {renderButton('ln')}
-            
+
             {renderButton('(')}
             {renderButton(')')}
+            {renderButton('x²')}
             {renderButton('^')}
             {renderButton('sqrt')}
-            {renderButton('!')}
-
-            {renderButton('C', 'col-span-2', resetCalculator)}
+            
+            {renderButton('C')}
+            {renderButton('x!')}
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
-            {renderButton('/')}
             
+            {renderButton('/')}
+            {renderButton('*')}
             {renderButton('4')}
             {renderButton('5')}
             {renderButton('6')}
-            {renderButton('*')}
-            
+
+            {renderButton('-')}
+            {renderButton('+')}
             {renderButton('1')}
             {renderButton('2')}
             {renderButton('3')}
-            {renderButton('-')}
-
+            
+            {renderButton('=', 'row-span-2 h-full')}
             {renderButton('0', 'col-span-2')}
             {renderButton('.')}
-            {renderButton('=', '', handleEquals, { backgroundColor: '#34495E', color: 'white' })}
-            {renderButton('+', '', () => handleOperator('+'))}
         </div>
       </CardContent>
     </Card>
