@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -136,14 +137,6 @@ function HomePageContent() {
             <div className='space-y-4'>
                 <div className="relative">
                     <BasicCalculator addToHistory={handleAddToHistory} history={history} />
-                    <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className="absolute top-2 right-2"
-                        onClick={() => togglePinnedCalculator('home')}
-                    >
-                        {pinnedCalculators.includes('home') ? <PinOff className='text-primary' /> : <Pin />}
-                    </Button>
                 </div>
                 
                 {pinned.map(calculator => {
