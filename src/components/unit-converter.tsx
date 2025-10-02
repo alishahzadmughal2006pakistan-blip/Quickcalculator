@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft, Loader, Wand2 } from 'lucide-react';
+import { convertUnitsWithAi } from '@/ai/flows/unit-converter-flow';
+import { useToast } from '@/hooks/use-toast';
+import { Separator } from './ui/separator';
 
 const units = {
   Length: {
@@ -55,6 +58,11 @@ const UnitConverter = () => {
   const [toUnit, setToUnit] = useState(Object.keys(units.Length)[1]);
   const [value, setValue] = useState('');
   const [result, setResult] = useState<string | null>(null);
+
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiResult, setAiResult] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
   
   useEffect(() => {
     const unitKeys = Object.keys(units[category]);
@@ -109,7 +117,26 @@ const UnitConverter = () => {
     const temp = fromUnit;
     setFromUnit(toUnit);
     setToUnit(temp);
-  }
+  };
+
+  const handleAiConvert = () => {
+    if (!aiQuery) return;
+    setAiResult(null);
+
+    startTransition(async () => {
+      try {
+        const result = await convertUnitsWithAi({ query: aiQuery });
+        setAiResult(`${result.fromValue} ${result.fromUnit} = ${result.toValue.toFixed(5)} ${result.toUnit}`);
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "AI Conversion Failed",
+          description: "Couldn't understand the conversion. Please try rephrasing your request.",
+        });
+      }
+    });
+  };
 
   return (
     <Card className="w-full shadow-lg rounded-2xl">
@@ -117,6 +144,33 @@ const UnitConverter = () => {
         <CardTitle className="text-xl font-bold text-center">Unit Converter</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className='space-y-2'>
+            <Label htmlFor='ai-query'>Ask AI to Convert</Label>
+            <div className="flex gap-2">
+                <Input 
+                    id="ai-query" 
+                    placeholder='e.g. "2 miles to km"' 
+                    value={aiQuery}
+                    onChange={(e) => setAiQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAiConvert()}
+                />
+                <Button onClick={handleAiConvert} disabled={isPending} className="bg-purple-600 hover:bg-purple-700">
+                    {isPending ? <Loader className="animate-spin" /> : <Wand2 />}
+                </Button>
+            </div>
+        </div>
+
+        {aiResult && (
+             <div className="text-center space-y-2 pt-2">
+                <p className="text-muted-foreground">AI Result</p>
+                <p className="text-2xl font-bold text-purple-600 break-all">
+                {aiResult}
+                </p>
+            </div>
+        )}
+
+        <Separator />
+
         <div className="space-y-2">
             <Label>Category</Label>
             <Select value={category} onValueChange={(val) => setCategory(val as UnitCategory)}>
