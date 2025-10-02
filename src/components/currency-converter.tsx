@@ -17,22 +17,19 @@ const CurrencyConverter = () => {
   const [exchangeRate, setExchangeRate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingCurrencies, setIsFetchingCurrencies] = useState(true);
-  const [currencies, setCurrencies] = useState<{[key: string]: {description: string, code: string}}>([]);
+  const [currencies, setCurrencies] = useState<{[key: string]: string}>({});
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchCurrencies = async () => {
       setIsFetchingCurrencies(true);
       try {
-        const res = await fetch('https://api.exchangerate.host/symbols');
+        const res = await fetch('https://api.frankfurter.app/currencies');
         if (!res.ok) {
           throw new Error('Could not fetch currency list');
         }
         const data = await res.json();
-        if (!data.success) {
-            throw new Error('Failed to fetch currency symbols');
-        }
-        setCurrencies(data.symbols);
+        setCurrencies(data);
       } catch (error) {
         console.error(error);
         toast({
@@ -65,17 +62,15 @@ const CurrencyConverter = () => {
     setExchangeRate(null);
 
     try {
-      const res = await fetch(`https://api.exchangerate.host/latest?base=${fromCurrency}&symbols=${toCurrency}&amount=${numAmount}`);
+      const res = await fetch(`https://api.frankfurter.app/latest?amount=${numAmount}&from=${fromCurrency}&to=${toCurrency}`);
       if (!res.ok) {
         throw new Error('Failed to fetch rates');
       }
       const data = await res.json();
-        if (!data.success) {
-            throw new Error('Failed to get conversion rate');
-        }
       const rate = data.rates[toCurrency];
       setResult(rate.toFixed(2));
-      const singleUnitRes = await fetch(`https://api.exchangerate.host/latest?base=${fromCurrency}&symbols=${toCurrency}`);
+      
+      const singleUnitRes = await fetch(`https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`);
       const singleUnitData = await singleUnitRes.json();
       setExchangeRate(`1 ${fromCurrency} = ${singleUnitData.rates[toCurrency].toFixed(4)} ${toCurrency}`);
 
@@ -97,7 +92,7 @@ const CurrencyConverter = () => {
     setToCurrency(temp);
   };
 
-  const currencyOptions = Object.values(currencies);
+  const currencyOptions = Object.entries(currencies);
 
   return (
     <Card className="w-full shadow-lg rounded-2xl">
@@ -123,7 +118,7 @@ const CurrencyConverter = () => {
                 {isFetchingCurrencies ? (
                     <SelectItem value="loading" disabled>Loading currencies...</SelectItem>
                 ) : (
-                    currencyOptions.map(({code, description}) => <SelectItem key={code} value={code}>{code} - {description}</SelectItem>)
+                    currencyOptions.map(([code, name]) => <SelectItem key={code} value={code}>{code} - {name}</SelectItem>)
                 )}
               </SelectContent>
             </Select>
@@ -141,7 +136,7 @@ const CurrencyConverter = () => {
                 {isFetchingCurrencies ? (
                     <SelectItem value="loading" disabled>Loading currencies...</SelectItem>
                 ) : (
-                    currencyOptions.map(({code, description}) => <SelectItem key={code} value={code}>{code} - {description}</SelectItem>)
+                    currencyOptions.map(([code, name]) => <SelectItem key={code} value={code}>{code} - {name}</SelectItem>)
                 )}
               </SelectContent>
             </Select>
