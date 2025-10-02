@@ -45,9 +45,30 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Splash screen timer
     const timer = setTimeout(() => setLoading(false), 2000);
+    
+    // Load history from localStorage on initial render
+    try {
+      const storedHistory = localStorage.getItem('calculatorHistory');
+      if (storedHistory) {
+        setHistory(JSON.parse(storedHistory));
+      }
+    } catch (error) {
+      console.error("Failed to load history from localStorage", error);
+    }
+
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    // Save history to localStorage whenever it changes
+    try {
+      localStorage.setItem('calculatorHistory', JSON.stringify(history));
+    } catch (error) {
+      console.error("Failed to save history to localStorage", error);
+    }
+  }, [history]);
   
   const handleAddToHistory = (calculation: string) => {
     setHistory(prev => [calculation, ...prev.slice(0, 49)]);
@@ -55,6 +76,11 @@ export default function Home() {
 
   const handleClearHistory = () => {
     setHistory([]);
+    try {
+      localStorage.removeItem('calculatorHistory');
+    } catch (error) {
+      console.error("Failed to clear history from localStorage", error);
+    }
   };
 
   if (loading) {
