@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Gem, Pin, PinOff, Trash2, Share2 } from 'lucide-react';
+import { Gem, Pin, PinOff, Trash2, History } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
+    const { toast } = useToast();
 
     const handleClearHistory = () => {
         try {
@@ -40,6 +41,15 @@ const SettingsScreen = () => {
             console.error("Failed to clear history from localStorage", error);
         }
     };
+
+    const handleRestorePurchase = () => {
+        // In a real app, this would involve calling your app store's SDK
+        setPremium(true);
+        toast({
+            title: "Purchase Restored",
+            description: "Your premium access has been successfully restored.",
+        });
+    }
     
     return (
         <Card className="w-full max-w-md mx-auto animate-fade-in-scale">
@@ -76,7 +86,7 @@ const SettingsScreen = () => {
                     </AlertDialog>
                 </div>
                 {!isPremium && (
-                    <div className="border-t pt-4">
+                    <div className="border-t pt-4 space-y-4">
                         <Card className="bg-gradient-to-br from-blue-500 to-rose-500 border-primary/20 text-center p-6 space-y-4">
                              <div className="flex justify-center">
                                 <Gem className="w-12 h-12 text-primary-foreground" />
@@ -91,18 +101,23 @@ const SettingsScreen = () => {
                                 Upgrade to Premium
                             </Button>
                         </Card>
+                        <Button 
+                            onClick={handleRestorePurchase}
+                            className="w-full"
+                            variant='outline'
+                        >
+                            <History className="mr-2 h-4 w-4" />
+                           Restore Purchase
+                        </Button>
                     </div>
                 )}
                  {isPremium && (
                     <div className="border-t pt-4 text-center space-y-2">
-                        <p className="font-semibold text-primary">You are a Premium user!</p>
-                         <Button 
-                            onClick={() => setPremium(false)}
-                            className="w-full"
-                            variant='outline'
-                            >
-                           Revert to Free Version
-                        </Button>
+                        <div className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg">
+                            <Gem className="w-8 h-8 text-primary" />
+                            <p className="font-semibold text-primary">You are a Premium user!</p>
+                            <p className="text-sm text-muted-foreground">All features are unlocked and ads are removed.</p>
+                        </div>
                     </div>
                 )}
             </CardContent>
@@ -114,8 +129,7 @@ const SettingsScreen = () => {
 function HomePageContent() {
   const [history, setHistory] = useState<string[]>([]);
   const { pinnedCalculators, togglePinnedCalculator, isPremium } = useSettings();
-  const { toast } = useToast();
-
+  
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -153,35 +167,6 @@ function HomePageContent() {
     setHistory(prev => [calculation, ...prev.slice(0, 49)]);
   };
 
-  const handleShareResult = async (calculation: string) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Calculator Result',
-          text: `Here is my calculation from Quick Calculator+:\n${calculation}`,
-        });
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Sharing failed",
-          description: "Could not share the result at this time.",
-        })
-      }
-    } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(calculation);
-        toast({
-          title: "Result Copied!",
-          description: "The calculation has been copied to your clipboard.",
-        })
-    } else {
-       toast({
-          variant: "destructive",
-          title: "Nothing to Share",
-          description: "Perform a calculation first.",
-        })
-    }
-  };
-
   const renderActiveCalculator = () => {
     if (activeCalculator === 'home') {
         const pinned = allCalculators.filter(c => c.key !== 'home' && pinnedCalculators.includes(c.key));
@@ -189,7 +174,7 @@ function HomePageContent() {
         return (
             <div className='space-y-4'>
                 <div className="relative animate-fade-in-scale">
-                    <BasicCalculator addToHistory={handleAddToHistory} history={history} onShare={handleShareResult} />
+                    <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 </div>
                 
                 {pinned.length > 0 ? (
