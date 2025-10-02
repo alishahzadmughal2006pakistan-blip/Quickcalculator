@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Divide, Minus, Plus, X } from 'lucide-react';
+import { Divide, Minus, Plus, Share2, X } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 type CalculatorProps = {
   addToHistory: (calculation: string) => void;
@@ -16,6 +17,9 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   const [firstOperand, setFirstOperand] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForSecondOperand, setWaitingForSecondOperand] = useState(false);
+  const [lastCalculation, setLastCalculation] = useState<string | null>(null);
+  const { toast } = useToast();
+
 
   const inputDigit = (digit: string) => {
     if (waitingForSecondOperand) {
@@ -39,9 +43,16 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     '-': (first, second) => first - second,
     '^': (first, second) => Math.pow(first, second),
   };
+  
+  const finishCalculation = (calculationString: string, result: number) => {
+    addToHistory(calculationString);
+    setLastCalculation(calculationString);
+    setDisplayValue(String(result));
+  }
 
   const handleOperator = (nextOperator: string) => {
     const inputValue = parseFloat(displayValue);
+    setLastCalculation(null);
 
     if (operator && waitingForSecondOperand) {
       setOperator(nextOperator);
@@ -55,8 +66,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
         const result = performCalculation[operator](firstOperand, inputValue);
         if(!isFinite(result)) throw new Error("Calculation error");
         const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
-        addToHistory(calculationString);
-        setDisplayValue(String(result));
+        finishCalculation(calculationString, result);
         setFirstOperand(result);
       } catch (error) {
         setDisplayValue("Error");
@@ -72,6 +82,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     const inputValue = parseFloat(displayValue);
     let result: number;
     let calculationString = '';
+    setLastCalculation(null);
 
     try {
         if (operation === '√') {
@@ -90,8 +101,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
         }
 
         if(!isFinite(result)) throw new Error("Calculation error");
-        addToHistory(calculationString);
-        setDisplayValue(String(result));
+        finishCalculation(calculationString, result);
         setFirstOperand(result);
         setWaitingForSecondOperand(true);
 
@@ -108,6 +118,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     setFirstOperand(null);
     setOperator(null);
     setWaitingForSecondOperand(false);
+    setLastCalculation(null);
   };
 
   const handleEquals = () => {
@@ -117,8 +128,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
         const result = performCalculation[operator](firstOperand, inputValue);
         if(!isFinite(result)) throw new Error("Calculation error");
         const calculationString = `${firstOperand} ${operator === '*' ? '×' : operator} ${inputValue} = ${result}`;
-        addToHistory(calculationString);
-        setDisplayValue(String(result));
+        finishCalculation(calculationString, result);
         setFirstOperand(null);
         setOperator(null);
         setWaitingForSecondOperand(false);
@@ -131,9 +141,29 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     }
   };
 
-  const toggleSign = () => {
-    setDisplayValue(String(parseFloat(displayValue) * -1));
+  const handleShare = async () => {
+    if (lastCalculation && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Calculator Result',
+          text: `Here is my calculation from Quick Calculator+:\n${lastCalculation}`,
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Sharing failed",
+          description: "Could not share the result at this time.",
+        })
+      }
+    } else if (!navigator.share) {
+       toast({
+          variant: "destructive",
+          title: "Not supported",
+          description: "Your browser does not support the Web Share API.",
+        })
+    }
   };
+
   
   const renderButton = (key: string, className? : string, customClick?: () => void) => {
     const isNumber = !isNaN(parseInt(key)) || key === '.';
@@ -146,7 +176,7 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
     if(isBinaryOperator || isEquals) variant = 'default';
     if(isClear || key === '+/-' || key === '%' || isUnaryOperator) variant = 'outline';
 
-    const iconMap: { [key: string]: React.ReactNode } = {
+    const iconMap: { [key:string]: React.ReactNode } = {
         '/': <Divide size={20} />,
         '*': <X size={20} />,
         '-': <Minus size={20} />,
@@ -166,13 +196,8 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
               customClick();
               return;
             }
-            if (displayValue === "Error") {
+            if (displayValue === "Error" && !isClear) {
               resetCalculator();
-              if(!isClear) {
-                 if (key === '.') inputDecimal();
-                 else inputDigit(key);
-              }
-              return;
             }
             if (isNumber) {
               if (key === '.') inputDecimal();
@@ -194,22 +219,32 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
   }
 
   return (
-    <Card className="w-full shadow-lg rounded-2xl h-full">
+    <Card className="w-full shadow-lg rounded-2xl h-full flex flex-col">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-center">Basic Calculator</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col justify-between">
         <div className="flex flex-col gap-4">
-          <div className="bg-muted text-right rounded-lg p-3 break-all">
+          <div className="bg-muted text-right rounded-lg p-3 break-all relative">
             <ScrollArea className="h-16 sm:h-20 mb-2">
                 <div className="flex flex-col items-end gap-1 pr-2">
                   {history.slice(0, 5).reverse().map((item, index) => (
-                    <p key={index} className={`text-muted-foreground text-xs ${index === 4 ? 'font-bold' : ''}`}>
+                    <p key={index} className={`text-muted-foreground text-xs ${index === 0 ? 'font-bold' : ''}`}>
                       {item}
                     </p>
                   ))}
                 </div>
             </ScrollArea>
+             {lastCalculation && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1 left-1 h-8 w-8"
+                onClick={handleShare}
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            )}
             <p className="text-3xl sm:text-5xl font-light text-foreground">{displayValue}</p>
           </div>
 
@@ -219,6 +254,11 @@ const BasicCalculator = ({ addToHistory, history }: CalculatorProps) => {
             {renderButton('√')}
             {renderButton('/')}
 
+            {renderButton('x²')}
+            {renderButton('log')}
+            {renderButton('(')}
+            {renderButton(')')}
+            
             {renderButton('7')}
             {renderButton('8')}
             {renderButton('9')}
