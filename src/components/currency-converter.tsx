@@ -24,6 +24,7 @@ const CurrencyConverter = () => {
     const fetchCurrencies = async () => {
       setIsFetchingCurrencies(true);
       try {
+        // Fetch currency list from a reliable source
         const res = await fetch('https://api.frankfurter.app/currencies');
         if (!res.ok) {
           throw new Error('Could not fetch currency list');
@@ -62,24 +63,31 @@ const CurrencyConverter = () => {
     setExchangeRate(null);
 
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?amount=${numAmount}&from=${fromCurrency}&to=${toCurrency}`);
+      // Use open.er-api.com for conversion rates
+      const res = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
       if (!res.ok) {
         throw new Error('Failed to fetch rates');
       }
       const data = await res.json();
-      const rate = data.rates[toCurrency];
-      setResult(rate.toFixed(2));
-      
-      const singleUnitRes = await fetch(`https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`);
-      const singleUnitData = await singleUnitRes.json();
-      setExchangeRate(`1 ${fromCurrency} = ${singleUnitData.rates[toCurrency].toFixed(4)} ${toCurrency}`);
+      if(data.result === 'error') {
+        throw new Error(data['error-type'] || 'Failed to fetch rates');
+      }
 
-    } catch (error) {
+      const rate = data.rates[toCurrency];
+      if (!rate) {
+          throw new Error('Conversion rate not available for the selected currency pair.');
+      }
+      
+      const convertedAmount = numAmount * rate;
+      setResult(convertedAmount.toFixed(2));
+      setExchangeRate(`1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`);
+
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Conversion Failed",
-        description: "Could not fetch the latest exchange rates. The selected currency pair may not be supported.",
+        description: error.message || "Could not fetch the latest exchange rates. The selected currency pair may not be supported.",
       });
     } finally {
       setIsLoading(false);
