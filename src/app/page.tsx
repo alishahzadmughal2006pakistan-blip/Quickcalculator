@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calculator, LayoutGrid, Wrench, Settings } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import TipCalculator from '@/components/tip-calculator';
+import BmiCalculator from '@/components/bmi-calculator';
 
 export default function Home() {
   const [history, setHistory] = useState<string[]>([]);
@@ -29,9 +30,10 @@ export default function Home() {
               <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="free" className="pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                 <BasicCalculator addToHistory={handleAddToHistory} history={history} />
                 <TipCalculator />
+                <BmiCalculator />
               </div>
             </TabsContent>
             <TabsContent value="advanced" className="pt-4">
