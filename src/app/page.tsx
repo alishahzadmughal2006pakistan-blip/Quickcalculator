@@ -48,27 +48,6 @@ const SettingsScreen = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        const handleClearHistory = () => {
-            if (typeof window !== 'undefined') {
-                try {
-                    localStorage.removeItem('calculatorHistory');
-                    toast({
-                        title: "History Cleared",
-                        description: "Your calculation history has been deleted.",
-                    });
-                     // We can reload to ensure the UI updates everywhere
-                    setTimeout(() => window.location.reload(), 500);
-                } catch (error) {
-                    console.error("Failed to clear history from localStorage", error);
-                    toast({
-                        variant: "destructive",
-                        title: "Error",
-                        description: "Could not clear history.",
-                    });
-                }
-            }
-        };
-
         console.log("=== REACT DEBUG ===");
         console.log("window.handlePurchase:", typeof window.handlePurchase);
         console.log("window.isAndroidApp:", window.isAndroidApp);
@@ -252,7 +231,7 @@ const SettingsScreen = () => {
                             window.handlePurchase();
                             return;
                         }
-                        console.log("❌ No Android methods available");
+                        console.log("❌ No Android methods available, using URL fallback");
                         window.location.href = "quickcalculator://purchase";
                     }}
                     style={{ 
