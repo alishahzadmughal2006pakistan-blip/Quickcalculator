@@ -48,6 +48,24 @@ const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
     const { toast } = useToast();
 
+    // Add this useEffect to debug
+    useEffect(() => {
+        console.log("=== REACT DEBUG ===");
+        console.log("window.handlePurchase:", typeof window.handlePurchase);
+        console.log("window.isAndroidApp:", window.isAndroidApp);
+        console.log("window.Android:", typeof window.Android);
+        
+        // Check every second for Android functions
+        const interval = setInterval(() => {
+            if (window.handlePurchase) {
+                console.log("✅ Android functions are NOW available");
+                clearInterval(interval);
+            }
+        }, 1000);
+        
+        return () => clearInterval(interval);
+    }, []);
+
     useEffect(() => {
         const handlePurchaseEvent = () => {
           setPremium(true);
