@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -116,10 +117,6 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
         unlockFeature,
         togglePinnedCalculator
     };
-
-    if (!isLoaded) {
-        return null;
-    }
 
     return (
         <SettingsContext.Provider value={value}>

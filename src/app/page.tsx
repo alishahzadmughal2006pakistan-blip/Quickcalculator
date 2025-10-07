@@ -295,14 +295,14 @@ function HomePageContent() {
 }
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+    setIsClient(true);
   }, []);
 
-  if (loading) {
+
+  if (!isClient) {
     return <SplashScreen />;
   }
 
