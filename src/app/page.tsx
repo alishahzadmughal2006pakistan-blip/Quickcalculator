@@ -61,6 +61,24 @@ const SettingsScreen = () => {
         };
     }, [setPremium, toast]);
 
+    useEffect(() => {
+        // Listen for Android ready event
+        const handleAndroidReady = () => {
+            console.log('🟢 Android interface is ready!');
+            toast({
+                title: "Android Billing Ready",
+                description: "Real Google Play billing is available",
+            });
+        };
+
+        window.addEventListener('androidReady', handleAndroidReady);
+
+        return () => {
+            window.removeEventListener('androidReady', handleAndroidReady);
+        };
+    }, [toast]);
+
+
     const handleClearHistory = () => {
         if (typeof window !== 'undefined') {
             try {
@@ -149,6 +167,21 @@ const SettingsScreen = () => {
                 </div>
                 {!isPremium && (
                     <div className="border-t pt-4 space-y-4">
+                        {/* Add this temporary test button */}
+                        <Button 
+                          onClick={() => {
+                            // Check if Android functions exist
+                            if (window.handlePurchase) {
+                              alert("✅ Android functions ARE available!");
+                              window.handlePurchase();
+                            } else {
+                              alert("❌ Android functions are NOT available");
+                            }
+                          }}
+                          style={{backgroundColor: 'red', color: 'white'}}
+                        >
+                          TEST ANDROID CONNECTION
+                        </Button>
                         <Card className="bg-gradient-to-br from-blue-500 to-rose-500 border-primary/20 text-center p-6 space-y-4">
                              <div className="flex justify-center">
                                 <Gem className="w-12 h-12 text-primary-foreground" />
