@@ -33,7 +33,6 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [unlockedFeatures, setUnlockedFeatures] = useState<string[]>([]);
     const [pinnedCalculators, setPinnedCalculators] = useState<string[]>(['home']);
-    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         try {
@@ -59,10 +58,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
         } catch (error) {
             console.error("Failed to load settings from localStorage", error);
-            // Reset to defaults on error
             setPinnedCalculators(['home']);
         }
-        setIsLoaded(true);
     }, []);
 
     const setPremium = (premium: boolean) => {
