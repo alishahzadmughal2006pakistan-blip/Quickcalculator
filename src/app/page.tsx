@@ -35,11 +35,9 @@ declare global {
         handlePurchase?: () => void;
         handleRestorePurchase?: () => void;
         isAndroidApp?: boolean;
-        androidPurchase?: {
-          purchase: () => void;
-        };
         Android?: {
           purchasePremium: () => void;
+          restorePurchase: () => void;
         }
     }
 }
@@ -48,61 +46,48 @@ const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
     const { toast } = useToast();
 
-    // Add this useEffect to debug
     useEffect(() => {
         console.log("=== REACT DEBUG ===");
         console.log("window.handlePurchase:", typeof window.handlePurchase);
         console.log("window.isAndroidApp:", window.isAndroidApp);
         console.log("window.Android:", typeof window.Android);
-        
-        // Check every second for Android functions
-        const interval = setInterval(() => {
-            if (window.handlePurchase) {
-                console.log("✅ Android functions are NOW available");
-                clearInterval(interval);
-            }
-        }, 1000);
-        
-        return () => clearInterval(interval);
-    }, []);
 
-    useEffect(() => {
         const handlePurchaseEvent = () => {
-          setPremium(true);
-          toast({
-            title: "Purchase Successful!",
-            description: "Premium membership activated!",
-          });
-        };
-      
-        // These custom events would be dispatched from your native Android code
-        // after a successful purchase or restore operation via the Google Play Billing library.
-        window.addEventListener('purchaseSuccess', handlePurchaseEvent as EventListener);
-        window.addEventListener('purchaseRestored', handlePurchaseEvent as EventListener);
-      
-        return () => {
-          window.removeEventListener('purchaseSuccess', handlePurchaseEvent as EventListener);
-          window.removeEventListener('purchaseRestored', handlePurchaseEvent as EventListener);
-        };
-    }, [setPremium, toast]);
-
-    useEffect(() => {
-        // Listen for Android ready event
-        const handleAndroidReady = () => {
-            console.log('🟢 Android interface is ready!');
+            console.log("🟢 Purchase successful event received");
+            setPremium(true);
             toast({
-                title: "Android Billing Ready",
-                description: "Real Google Play billing is available",
+                title: "Purchase Successful!",
+                description: "Premium membership activated!",
             });
         };
 
-        window.addEventListener('androidReady', handleAndroidReady);
+        const handleRestoreEvent = () => {
+            console.log("🟢 Purchase restored event received");
+            setPremium(true);
+            toast({
+                title: "Purchase Restored",
+                description: "Premium membership restored!",
+            });
+        };
+
+        const handleNoPurchaseEvent = () => {
+            console.log("🟡 No purchase found event received");
+            toast({
+                title: "No Purchase Found",
+                description: "No previous purchases were found.",
+            });
+        };
+
+        window.addEventListener('purchaseSuccess', handlePurchaseEvent);
+        window.addEventListener('purchaseRestored', handleRestoreEvent);
+        window.addEventListener('noPurchaseFound', handleNoPurchaseEvent);
 
         return () => {
-            window.removeEventListener('androidReady', handleAndroidReady);
+            window.removeEventListener('purchaseSuccess', handlePurchaseEvent);
+            window.removeEventListener('purchaseRestored', handleRestoreEvent);
+            window.removeEventListener('noPurchaseFound', handleNoPurchaseEvent);
         };
-    }, [toast]);
-
+    }, [setPremium, toast]);
 
     const handleClearHistory = () => {
         if (typeof window !== 'undefined') {
@@ -125,28 +110,45 @@ const SettingsScreen = () => {
         }
     };
 
-    const handleRestorePurchase = () => {
-        // =================================================================================
-        // TODO: GOOGLE PLAY BILLING INTEGRATION - RESTORE PURCHASE
-        // =================================================================================
-        // 1. Check if the custom `handleRestorePurchase` function exists on the window object.
-        //    This function should be injected by your Android WebView wrapper.
-        // 2. If it exists, call it. This function will trigger the native Google Play
-        //    Billing SDK's logic to query for existing purchases.
-        // 3. The native code should then dispatch a 'purchaseRestored' event upon success,
-        //    which the `useEffect` in this component will listen for.
-        if (window.handleRestorePurchase) {
-            window.handleRestorePurchase();
+    const handlePurchase = () => {
+        console.log("=== PURCHASE BUTTON CLICKED ===");
+        console.log("window.handlePurchase:", typeof window.handlePurchase);
+        console.log("window.Android:", typeof window.Android);
+        if (window.handlePurchase) {
+            console.log("Calling window.handlePurchase...");
+            window.handlePurchase();
+        } else if (window.Android && window.Android.purchasePremium) {
+            console.log("Calling Android.purchasePremium directly...");
+            window.Android.purchasePremium();
         } else {
-            // This is a fallback for web development and testing.
-            console.log("Simulating restore purchase...");
+            console.log("No Android interface available, using web fallback");
             setPremium(true);
             toast({
-                title: "Purchase Restored",
-                description: "Your premium access has been successfully restored (Web simulation).",
+                title: "Purchase Simulation",
+                description: "In Android app, this would open Google Play Billing",
             });
         }
-    }
+    };
+
+    const handleRestorePurchase = () => {
+        console.log("=== RESTORE BUTTON CLICKED ===");
+        console.log("window.handleRestorePurchase:", typeof window.handleRestorePurchase);
+        console.log("window.Android:", typeof window.Android);
+        if (window.handleRestorePurchase) {
+            console.log("Calling window.handleRestorePurchase...");
+            window.handleRestorePurchase();
+        } else if (window.Android && window.Android.restorePurchase) {
+            console.log("Calling Android.restorePurchase directly...");
+            window.Android.restorePurchase();
+        } else {
+            console.log("No Android interface available, using web fallback");
+            setPremium(true);
+            toast({
+                title: "Restore Simulation",
+                description: "In Android app, this would check Google Play purchases",
+            });
+        }
+    };
     
     return (
         <Card className="w-full max-w-md mx-auto animate-fade-in-scale">
@@ -192,37 +194,6 @@ const SettingsScreen = () => {
                 </div>
                 {!isPremium && (
                     <div className="border-t pt-4 space-y-4">
-                        {/* TEST BUTTON - Add this to your SettingsScreen */}
-                        <Button 
-                          onClick={() => {
-                            console.log("=== ANDROID DEBUG ===");
-                            console.log("handlePurchase:", typeof window.handlePurchase);
-                            console.log("isAndroidApp:", window.isAndroidApp);
-                            console.log("Android object:", typeof window.Android);
-                            
-                            // Try multiple methods
-                            if (window.handlePurchase) {
-                              console.log("✅ Method 1: window.handlePurchase is available");
-                              window.handlePurchase();
-                            } else if (window.androidPurchase) {
-                              console.log("✅ Method 2: window.androidPurchase is available");
-                              window.androidPurchase.purchase();
-                            } else if (typeof window.Android !== 'undefined' && window.Android.purchasePremium) {
-                              console.log("✅ Method 3: window.Android object is available");
-                              window.Android.purchasePremium();
-                            } else {
-                              console.log("❌ No Android methods available");
-                              alert("No Android connection detected");
-                            }
-                          }}
-                          style={{ 
-                            backgroundColor: 'red', 
-                            color: 'white',
-                            marginTop: '10px'
-                          }}
-                        >
-                          🧪 TEST ANDROID CONNECTION
-                        </Button>
                         <Card className="bg-gradient-to-br from-blue-500 to-rose-500 border-primary/20 text-center p-6 space-y-4">
                              <div className="flex justify-center">
                                 <Gem className="w-12 h-12 text-primary-foreground" />
@@ -230,28 +201,7 @@ const SettingsScreen = () => {
                             <h3 className="text-xl font-bold text-primary-foreground">Go Premium!</h3>
                             <p className="text-sm text-primary-foreground/80">Remove ads and unlock all advanced calculators permanently.</p>
                             <Button 
-                                onClick={() => {
-                                    // =========================================================================
-                                    // TODO: GOOGLE PLAY BILLING INTEGRATION - INITIATE PURCHASE
-                                    // =========================================================================
-                                    // 1. Check if the custom `handlePurchase` function exists on the window object.
-                                    //    This function should be injected by your Android WebView wrapper.
-                                    // 2. If it exists, call it. This function will trigger the native Google Play
-                                    //    Billing SDK to launch the purchase flow for your "premium" product.
-                                    // 3. The native code should then dispatch a 'purchaseSuccess' event upon success,
-                                    //    which the `useEffect` in this component will listen for.
-                                    if (window.handlePurchase) {
-                                        window.handlePurchase();
-                                    } else {
-                                        // This is a fallback for web development and testing.
-                                        console.log("Simulating premium purchase...");
-                                        setPremium(true); 
-                                        toast({
-                                            title: "Purchase Successful!",
-                                            description: "Premium activated (Web simulation).",
-                                        });
-                                      }
-                                }}
+                                onClick={handlePurchase}
                                 className="w-full bg-background text-foreground hover:bg-background/90"
                                 size="lg"
                             >
@@ -277,6 +227,33 @@ const SettingsScreen = () => {
                         </div>
                     </div>
                 )}
+                {/* EMERGENCY DIAGNOSTIC BUTTON */}
+                <Button 
+                    onClick={() => {
+                        console.log("=== EMERGENCY DIAGNOSTIC ===");
+                        console.log("window.handlePurchase:", typeof window.handlePurchase);
+                        console.log("window.Android:", typeof window.Android);
+                        if (typeof window.Android !== 'undefined' && typeof window.Android.purchasePremium === 'function') {
+                            console.log("✅ Method 1: Android object available");
+                            window.Android.purchasePremium();
+                            return;
+                        }
+                        if (typeof window.handlePurchase === 'function') {
+                            console.log("✅ Method 2: handlePurchase available");
+                            window.handlePurchase();
+                            return;
+                        }
+                        console.log("❌ No Android methods available");
+                        alert("No Android connection detected. Check console for details.");
+                    }}
+                    style={{ 
+                        backgroundColor: 'orange', 
+                        color: 'white',
+                        margin: '10px 0'
+                    }}
+                >
+                    🚨 EMERGENCY DIAGNOSTIC
+                </Button>
             </CardContent>
         </Card>
     );
