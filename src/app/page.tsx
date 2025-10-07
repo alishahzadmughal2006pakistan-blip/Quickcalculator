@@ -35,11 +35,23 @@ const SettingsScreen = () => {
     const { toast } = useToast();
 
     const handleClearHistory = () => {
-        try {
-            localStorage.removeItem('calculatorHistory');
-            window.location.reload();
-        } catch (error) {
-            console.error("Failed to clear history from localStorage", error);
+        if (typeof window !== 'undefined') {
+            try {
+                localStorage.removeItem('calculatorHistory');
+                toast({
+                    title: "History Cleared",
+                    description: "Your calculation history has been deleted.",
+                });
+                 // We can reload to ensure the UI updates everywhere
+                setTimeout(() => window.location.reload(), 500);
+            } catch (error) {
+                console.error("Failed to clear history from localStorage", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Could not clear history.",
+                });
+            }
         }
     };
 
