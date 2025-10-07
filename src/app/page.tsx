@@ -30,9 +30,36 @@ import SplashScreen from '@/components/splash-screen';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
+declare global {
+    interface Window {
+        handlePurchase?: () => void;
+        handleRestorePurchase?: () => void;
+    }
+}
+
 const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
     const { toast } = useToast();
+
+    useEffect(() => {
+        const handlePurchaseEvent = () => {
+          setPremium(true);
+          toast({
+            title: "Purchase Successful!",
+            description: "Premium membership activated!",
+          });
+        };
+      
+        // These custom events would be dispatched from your native Android code
+        // after a successful purchase or restore operation via the Google Play Billing library.
+        window.addEventListener('purchaseSuccess', handlePurchaseEvent as EventListener);
+        window.addEventListener('purchaseRestored', handlePurchaseEvent as EventListener);
+      
+        return () => {
+          window.removeEventListener('purchaseSuccess', handlePurchaseEvent as EventListener);
+          window.removeEventListener('purchaseRestored', handlePurchaseEvent as EventListener);
+        };
+    }, [setPremium, toast]);
 
     const handleClearHistory = () => {
         if (typeof window !== 'undefined') {
@@ -59,19 +86,23 @@ const SettingsScreen = () => {
         // =================================================================================
         // TODO: GOOGLE PLAY BILLING INTEGRATION - RESTORE PURCHASE
         // =================================================================================
-        // 1. Call your Google Play Billing library's function to query for existing
-        //    purchases (e.g., `billingClient.queryPurchasesAsync`).
-        // 2. Check the response to see if the user owns the "premium" product.
-        // 3. If they do, call `setPremium(true)`.
-        // 4. If they don't, you can show a toast message like "No past purchases found."
-        //
-        // The code below simulates a successful restoration.
-        console.log("Simulating restore purchase...");
-        setPremium(true);
-        toast({
-            title: "Purchase Restored",
-            description: "Your premium access has been successfully restored.",
-        });
+        // 1. Check if the custom `handleRestorePurchase` function exists on the window object.
+        //    This function should be injected by your Android WebView wrapper.
+        // 2. If it exists, call it. This function will trigger the native Google Play
+        //    Billing SDK's logic to query for existing purchases.
+        // 3. The native code should then dispatch a 'purchaseRestored' event upon success,
+        //    which the `useEffect` in this component will listen for.
+        if (window.handleRestorePurchase) {
+            window.handleRestorePurchase();
+        } else {
+            // This is a fallback for web development and testing.
+            console.log("Simulating restore purchase...");
+            setPremium(true);
+            toast({
+                title: "Purchase Restored",
+                description: "Your premium access has been successfully restored (Web simulation).",
+            });
+        }
     }
     
     return (
@@ -129,14 +160,23 @@ const SettingsScreen = () => {
                                     // =========================================================================
                                     // TODO: GOOGLE PLAY BILLING INTEGRATION - INITIATE PURCHASE
                                     // =========================================================================
-                                    // 1. Call your Google Play Billing library to fetch the product details
-                                    //    for your one-time purchase (e.g., product ID: "premium_unlock").
-                                    // 2. Launch the billing flow with the fetched product details.
-                                    // 3. In the callback for a successful purchase, call `setPremium(true)`.
-                                    //
-                                    // The code below simulates a successful purchase.
-                                    console.log("Simulating premium purchase...");
-                                    setPremium(true);
+                                    // 1. Check if the custom `handlePurchase` function exists on the window object.
+                                    //    This function should be injected by your Android WebView wrapper.
+                                    // 2. If it exists, call it. This function will trigger the native Google Play
+                                    //    Billing SDK to launch the purchase flow for your "premium" product.
+                                    // 3. The native code should then dispatch a 'purchaseSuccess' event upon success,
+                                    //    which the `useEffect` in this component will listen for.
+                                    if (window.handlePurchase) {
+                                        window.handlePurchase();
+                                    } else {
+                                        // This is a fallback for web development and testing.
+                                        console.log("Simulating premium purchase...");
+                                        setPremium(true); 
+                                        toast({
+                                            title: "Purchase Successful!",
+                                            description: "Premium activated (Web simulation).",
+                                        });
+                                      }
                                 }}
                                 className="w-full bg-background text-foreground hover:bg-background/90"
                                 size="lg"
@@ -144,10 +184,10 @@ const SettingsScreen = () => {
                                 Upgrade Now for $1.99
                             </Button>
                         </Card>
-                        <Button 
+                         <Button 
                             onClick={handleRestorePurchase}
+                            variant="ghost"
                             className="w-full"
-                            variant='outline'
                         >
                             <History className="mr-2 h-4 w-4" />
                            Restore Purchase
