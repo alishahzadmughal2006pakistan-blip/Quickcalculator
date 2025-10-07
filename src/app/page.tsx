@@ -34,6 +34,13 @@ declare global {
     interface Window {
         handlePurchase?: () => void;
         handleRestorePurchase?: () => void;
+        isAndroidApp?: boolean;
+        androidPurchase?: {
+          purchase: () => void;
+        };
+        Android?: {
+          purchasePremium: () => void;
+        }
     }
 }
 
@@ -167,20 +174,36 @@ const SettingsScreen = () => {
                 </div>
                 {!isPremium && (
                     <div className="border-t pt-4 space-y-4">
-                        {/* Add this temporary test button */}
+                        {/* TEST BUTTON - Add this to your SettingsScreen */}
                         <Button 
                           onClick={() => {
-                            // Check if Android functions exist
+                            console.log("=== ANDROID DEBUG ===");
+                            console.log("handlePurchase:", typeof window.handlePurchase);
+                            console.log("isAndroidApp:", window.isAndroidApp);
+                            console.log("Android object:", typeof Android);
+                            
+                            // Try multiple methods
                             if (window.handlePurchase) {
-                              alert("✅ Android functions ARE available!");
+                              console.log("✅ Method 1: window.handlePurchase is available");
                               window.handlePurchase();
+                            } else if (window.androidPurchase) {
+                              console.log("✅ Method 2: window.androidPurchase is available");
+                              window.androidPurchase.purchase();
+                            } else if (typeof Android !== 'undefined') {
+                              console.log("✅ Method 3: Android object is available");
+                              Android.purchasePremium();
                             } else {
-                              alert("❌ Android functions are NOT available");
+                              console.log("❌ No Android methods available");
+                              alert("No Android connection detected");
                             }
                           }}
-                          style={{backgroundColor: 'red', color: 'white'}}
+                          style={{ 
+                            backgroundColor: 'red', 
+                            color: 'white',
+                            marginTop: '10px'
+                          }}
                         >
-                          TEST ANDROID CONNECTION
+                          🧪 TEST ANDROID CONNECTION
                         </Button>
                         <Card className="bg-gradient-to-br from-blue-500 to-rose-500 border-primary/20 text-center p-6 space-y-4">
                              <div className="flex justify-center">
