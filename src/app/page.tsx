@@ -180,7 +180,7 @@ const SettingsScreen = () => {
                             console.log("=== ANDROID DEBUG ===");
                             console.log("handlePurchase:", typeof window.handlePurchase);
                             console.log("isAndroidApp:", window.isAndroidApp);
-                            console.log("Android object:", typeof Android);
+                            console.log("Android object:", typeof window.Android);
                             
                             // Try multiple methods
                             if (window.handlePurchase) {
@@ -189,9 +189,9 @@ const SettingsScreen = () => {
                             } else if (window.androidPurchase) {
                               console.log("✅ Method 2: window.androidPurchase is available");
                               window.androidPurchase.purchase();
-                            } else if (typeof Android !== 'undefined') {
-                              console.log("✅ Method 3: Android object is available");
-                              Android.purchasePremium();
+                            } else if (typeof window.Android !== 'undefined' && window.Android.purchasePremium) {
+                              console.log("✅ Method 3: window.Android object is available");
+                              window.Android.purchasePremium();
                             } else {
                               console.log("❌ No Android methods available");
                               alert("No Android connection detected");
