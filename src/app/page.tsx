@@ -38,6 +38,7 @@ declare global {
         Android?: {
           purchasePremium: () => void;
           restorePurchase: () => void;
+          testBridge: () => void;
         }
     }
 }
@@ -47,6 +48,27 @@ const SettingsScreen = () => {
     const { toast } = useToast();
 
     useEffect(() => {
+        const handleClearHistory = () => {
+            if (typeof window !== 'undefined') {
+                try {
+                    localStorage.removeItem('calculatorHistory');
+                    toast({
+                        title: "History Cleared",
+                        description: "Your calculation history has been deleted.",
+                    });
+                     // We can reload to ensure the UI updates everywhere
+                    setTimeout(() => window.location.reload(), 500);
+                } catch (error) {
+                    console.error("Failed to clear history from localStorage", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "Could not clear history.",
+                    });
+                }
+            }
+        };
+
         console.log("=== REACT DEBUG ===");
         console.log("window.handlePurchase:", typeof window.handlePurchase);
         console.log("window.isAndroidApp:", window.isAndroidApp);
@@ -88,7 +110,7 @@ const SettingsScreen = () => {
             window.removeEventListener('noPurchaseFound', handleNoPurchaseEvent);
         };
     }, [setPremium, toast]);
-
+    
     const handleClearHistory = () => {
         if (typeof window !== 'undefined') {
             try {
@@ -97,7 +119,7 @@ const SettingsScreen = () => {
                     title: "History Cleared",
                     description: "Your calculation history has been deleted.",
                 });
-                 // We can reload to ensure the UI updates everywhere
+                // We can reload to ensure the UI updates everywhere
                 setTimeout(() => window.location.reload(), 500);
             } catch (error) {
                 console.error("Failed to clear history from localStorage", error);
@@ -110,23 +132,17 @@ const SettingsScreen = () => {
         }
     };
 
+
     const handlePurchase = () => {
         console.log("=== PURCHASE BUTTON CLICKED ===");
         console.log("window.handlePurchase:", typeof window.handlePurchase);
         console.log("window.Android:", typeof window.Android);
-        if (window.handlePurchase) {
+        if (window.isAndroidApp && window.handlePurchase) {
             console.log("Calling window.handlePurchase...");
             window.handlePurchase();
-        } else if (window.Android && window.Android.purchasePremium) {
-            console.log("Calling Android.purchasePremium directly...");
-            window.Android.purchasePremium();
         } else {
-            console.log("No Android interface available, using web fallback");
-            setPremium(true);
-            toast({
-                title: "Purchase Simulation",
-                description: "In Android app, this would open Google Play Billing",
-            });
+            console.log("Using URL trigger for purchase...");
+            window.location.href = "quickcalculator://purchase";
         }
     };
 
@@ -134,19 +150,12 @@ const SettingsScreen = () => {
         console.log("=== RESTORE BUTTON CLICKED ===");
         console.log("window.handleRestorePurchase:", typeof window.handleRestorePurchase);
         console.log("window.Android:", typeof window.Android);
-        if (window.handleRestorePurchase) {
+        if (window.isAndroidApp && window.handleRestorePurchase) {
             console.log("Calling window.handleRestorePurchase...");
             window.handleRestorePurchase();
-        } else if (window.Android && window.Android.restorePurchase) {
-            console.log("Calling Android.restorePurchase directly...");
-            window.Android.restorePurchase();
         } else {
-            console.log("No Android interface available, using web fallback");
-            setPremium(true);
-            toast({
-                title: "Restore Simulation",
-                description: "In Android app, this would check Google Play purchases",
-            });
+            console.log("Using URL trigger for restore...");
+            window.location.href = "quickcalculator://restore";
         }
     };
     
@@ -227,15 +236,15 @@ const SettingsScreen = () => {
                         </div>
                     </div>
                 )}
-                {/* EMERGENCY DIAGNOSTIC BUTTON */}
                 <Button 
                     onClick={() => {
                         console.log("=== EMERGENCY DIAGNOSTIC ===");
                         console.log("window.handlePurchase:", typeof window.handlePurchase);
                         console.log("window.Android:", typeof window.Android);
-                        if (typeof window.Android !== 'undefined' && typeof window.Android.purchasePremium === 'function') {
+                        if (typeof window.Android !== 'undefined' && window.Android.testBridge) {
                             console.log("✅ Method 1: Android object available");
                             window.Android.purchasePremium();
+                            window.Android.testBridge();
                             return;
                         }
                         if (typeof window.handlePurchase === 'function') {
@@ -244,7 +253,7 @@ const SettingsScreen = () => {
                             return;
                         }
                         console.log("❌ No Android methods available");
-                        alert("No Android connection detected. Check console for details.");
+                        window.location.href = "quickcalculator://purchase";
                     }}
                     style={{ 
                         backgroundColor: 'orange', 
