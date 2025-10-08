@@ -55,6 +55,9 @@ const bmiSuggestionFlow = ai.defineFlow(
         return { suggestion: '' };
     }
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      return { suggestion: '' };
+    }
+    return output;
   }
 );

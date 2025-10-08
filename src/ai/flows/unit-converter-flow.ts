@@ -147,8 +147,8 @@ const unitConverterFlow = ai.defineFlow(
 
     const typedCategory = category as keyof typeof units;
 
-    if (!units[typedCategory]) {
-        throw new Error(`Invalid category: ${category}`);
+    if (!units[typedCategory] || !units[typedCategory][fromUnit as keyof typeof units[typeof typedCategory]] || !units[typedCategory][toUnit as keyof typeof units[typeof typedCategory]]) {
+        throw new Error(`Invalid unit or category detected: ${category}, ${fromUnit}, ${toUnit}`);
     }
 
     const toValue = performConversion(fromValue, fromUnit, toUnit, typedCategory);
