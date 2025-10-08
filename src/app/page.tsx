@@ -215,6 +215,7 @@ const SettingsScreen = () => {
                         </div>
                     </div>
                 )}
+                {/*
                 <Button 
                     onClick={() => {
                         console.log("=== EMERGENCY DIAGNOSTIC ===");
@@ -242,6 +243,7 @@ const SettingsScreen = () => {
                 >
                     🚨 EMERGENCY DIAGNOSTIC
                 </Button>
+                */}
             </CardContent>
         </Card>
     );
