@@ -214,7 +214,7 @@ const SettingsScreen = () => {
                         console.log("=== EMERGENCY DIAGNOSTIC ===");
                         console.log("window.handlePurchase:", typeof window.handlePurchase);
                         console.log("window.Android:", typeof window.Android);
-                        if (typeof window.Android !== 'undefined' && window.Android.testBridge) {
+                        if (typeof window.Android !== 'undefined' && window.Android.purchasePremium) {
                             console.log("✅ Method 1: Android object available");
                             window.Android.purchasePremium();
                             window.Android.testBridge();
