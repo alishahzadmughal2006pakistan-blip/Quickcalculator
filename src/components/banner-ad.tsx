@@ -2,30 +2,27 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useSettings } from '@/hooks/use-settings';
 
 export const BannerAd = () => {
-    const { setPremium } = useSettings();
-
     // =========================================================================
-    // TODO: GOOGLE ADMOB INTEGRATION - BANNER AD
+    // ANDROID NATIVE INTEGRATION - BANNER AD
     // =========================================================================
-    // 1. Import the banner ad component from your AdMob library.
-    // 2. Replace the entire <Card> component below with the real AdMob banner ad component.
-    //    For example: <AdMobBannerAd unitId="YOUR_BANNER_AD_UNIT_ID" />
-    // 3. The banner should only be rendered if the user is NOT premium, which is already
-    //    handled by the logic in `src/app/page.tsx`.
+    // This component is now a designated placeholder area for a native banner ad.
+    //
+    // In your Android app layout (e.g., activity_main.xml), you should place a
+    // native AdMob AdView at the bottom of the screen, outside of the WebView.
+    // The AdView should be managed entirely by the native Android code.
+    //
+    // This React component will just occupy space. You can control the visibility
+    // of the native AdView from your Android code based on the user's
+    // premium status.
+    //
+    // By handling the banner ad natively, you ensure better performance,
+    // refresh rates, and adherence to AdMob policies.
 
     return (
-        <Card className="w-full bg-primary/10 border-primary/20">
-            <CardContent className="p-4 flex items-center justify-between">
-                <div className="space-y-1">
-                    <h3 className="font-semibold text-primary">Upgrade to Premium</h3>
-                    <p className="text-sm text-primary/80">Remove ads and unlock all features!</p>
-                </div>
-                <Button onClick={() => setPremium(true)} size="sm">Upgrade</Button>
-            </CardContent>
-        </Card>
+        <div className="w-full h-[50px] bg-transparent flex items-center justify-center text-xs text-muted-foreground">
+            {/* This space is reserved for the native banner ad. */}
+        </div>
     );
 }

@@ -21,7 +21,16 @@ interface AdPlayerProps {
     featureName: string;
 }
 
-const AD_DURATION = 5; // Ad duration in seconds
+declare global {
+    interface Window {
+        Android?: {
+          showRewardedAd: () => void;
+        }
+    }
+}
+
+
+const AD_DURATION = 5; // Fallback duration in seconds if native bridge fails
 
 export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerProps) => {
     const [countdown, setCountdown] = useState(AD_DURATION);
@@ -36,74 +45,87 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
         }
 
         // =========================================================================
-        // TODO: GOOGLE ADMOB INTEGRATION - REWARDED AD
+        // ANDROID NATIVE INTEGRATION: REWARDED AD
         // =========================================================================
-        // 1. When this `useEffect` hook runs, load a rewarded ad from AdMob.
-        // 2. Once the ad is loaded, show it to the user.
-        // 3. In the AdMob SDK's `onAdDismissedFullScreenContent` or `onAdShowedFullScreenContent`
-        //    with an error, you might want to call `onClose()` to close the dialog.
-        // 4. In the `onUserEarnedReward` callback from the AdMob SDK, call `onComplete()`.
-        //    This will grant the user access to the feature.
-        //
-        // The code below simulates this flow with a timer. You should replace it.
+        // 1. This effect is triggered when the ad dialog opens.
+        // 2. We call `window.Android.showRewardedAd()` to ask the native Android
+        //    app to display a rewarded advertisement.
+        // 3. The native app is responsible for loading and showing the ad.
+        // 4. When the user successfully watches the ad, the native app MUST call
+        //    the `window.dispatchEvent(new Event('rewardedAdCompleted'))`
+        //    JavaScript event to notify this web app.
+        // 5. If the ad fails or is closed, the native app should call
+        //    `window.dispatchEvent(new Event('rewardedAdDismissed'))`.
+        
+        if (window.Android && typeof window.Android.showRewardedAd === 'function') {
+            window.Android.showRewardedAd();
+        } else {
+            console.warn("Android interface for Rewarded Ad not found. Using fallback timer.");
+            // Fallback timer for web/testing environments
+            const countdownInterval = setInterval(() => {
+                setCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(countdownInterval);
+                        onComplete();
+                        toast({
+                            title: `${featureName} Unlocked!`,
+                            description: "You can now use this feature for the rest of your session.",
+                        });
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(countdownInterval);
+        }
 
-        const countdownInterval = setInterval(() => {
-            setCountdown(prev => {
-                if (prev <= 1) {
-                    clearInterval(countdownInterval);
-                    // This is where you call onComplete() after a real ad is watched.
-                    onComplete();
-                    toast({
-                        title: `${featureName} Unlocked!`,
-                        description: "You can now use this feature for the rest of your session.",
-                    });
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
+    }, [isOpen, onComplete, featureName, toast]);
 
-        const progressInterval = setInterval(() => {
-            setProgress(prev => {
-                const newProgress = prev + (100 / (AD_DURATION * 10)); // Update every 100ms
-                if (newProgress >= 100) {
-                    clearInterval(progressInterval);
-                    return 100;
-                }
-                return newProgress;
+    useEffect(() => {
+        const handleAdCompleted = () => {
+            console.log("Rewarded ad completed. Granting reward.");
+            onComplete();
+            toast({
+                title: `${featureName} Unlocked!`,
+                description: "You can now use this feature for the rest of your session.",
             });
-        }, 100);
+        };
+
+        const handleAdDismissed = () => {
+            console.log("Rewarded ad dismissed.");
+            onClose();
+        };
+
+        window.addEventListener('rewardedAdCompleted', handleAdCompleted);
+        window.addEventListener('rewardedAdDismissed', handleAdDismissed);
 
         return () => {
-            clearInterval(countdownInterval);
-            clearInterval(progressInterval);
+            window.removeEventListener('rewardedAdCompleted', handleAdCompleted);
+            window.removeEventListener('rewardedAdDismissed', handleAdDismissed);
         };
-    }, [isOpen, onComplete, onClose, featureName, toast]);
+    }, [onComplete, onClose, featureName, toast]);
+
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
-                    <DialogTitle>Unlock Feature by Watching an Ad</DialogTitle>
+                    <DialogTitle>Unlock with an Ad</DialogTitle>
                     <DialogDescription>
-                        Your feature will be available after the ad finishes.
+                       An ad is being loaded. Your feature will be available after the ad finishes.
                     </DialogDescription>
                 </DialogHeader>
                 
-                <div className="aspect-video bg-black text-white flex items-center justify-center rounded-lg my-4">
-                    {/* This div simulates the video player from the AdMob SDK */}
-                    <p>Your ad is playing...</p>
+                <div className="aspect-video bg-black text-white flex flex-col items-center justify-center rounded-lg my-4 space-y-2">
+                    <p>Loading advertisement...</p>
+                    <p className="text-xs text-muted-foreground">(This dialog will close once the ad is ready)</p>
                 </div>
 
-                <DialogFooter className="sm:justify-between items-center">
-                    <p className="text-sm text-muted-foreground">
-                        Ad finishes in {countdown}s...
-                    </p>
+                <DialogFooter className="sm:justify-end items-center">
                     <Button type="button" variant="secondary" onClick={onClose}>
                         Cancel
                     </Button>
                 </DialogFooter>
-                <Progress value={progress} className="w-full h-2 absolute bottom-0 left-0 rounded-none" />
             </DialogContent>
         </Dialog>
     );
