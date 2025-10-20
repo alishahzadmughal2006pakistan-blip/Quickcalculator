@@ -32,13 +32,9 @@ import Link from 'next/link';
 
 declare global {
     interface Window {
-        handlePurchase?: () => void;
-        handleRestorePurchase?: () => void;
-        isAndroidApp?: boolean;
         Android?: {
           purchasePremium: () => void;
           restorePurchase: () => void;
-          testBridge: () => void;
         }
     }
 }
@@ -48,11 +44,6 @@ const SettingsScreen = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        console.log("=== REACT DEBUG ===");
-        console.log("window.handlePurchase:", typeof window.handlePurchase);
-        console.log("window.isAndroidApp:", window.isAndroidApp);
-        console.log("window.Android:", typeof window.Android);
-
         const handlePurchaseEvent = () => {
             console.log("🟢 Purchase successful event received");
             setPremium(true);
@@ -113,28 +104,30 @@ const SettingsScreen = () => {
 
 
     const handlePurchase = () => {
-        console.log("=== PURCHASE BUTTON CLICKED ===");
-        console.log("window.handlePurchase:", typeof window.handlePurchase);
-        console.log("window.Android:", typeof window.Android);
-        if (window.isAndroidApp && window.handlePurchase) {
-            console.log("Calling window.handlePurchase...");
-            window.handlePurchase();
+        console.log("Attempting to call RevenueCat purchase flow...");
+        if (window.Android && typeof window.Android.purchasePremium === 'function') {
+            window.Android.purchasePremium();
         } else {
-            console.log("Using URL trigger for purchase...");
-            window.location.href = "quickcalculator://purchase";
+            console.log("Android interface for RevenueCat not found. Is this a web browser?");
+            toast({
+                title: "In-App Purchases Not Available",
+                description: "Purchases can only be made from the Android app.",
+                variant: "destructive"
+            });
         }
     };
 
     const handleRestorePurchase = () => {
-        console.log("=== RESTORE BUTTON CLICKED ===");
-        console.log("window.handleRestorePurchase:", typeof window.handleRestorePurchase);
-        console.log("window.Android:", typeof window.Android);
-        if (window.isAndroidApp && window.handleRestorePurchase) {
-            console.log("Calling window.handleRestorePurchase...");
-            window.handleRestorePurchase();
+        console.log("Attempting to call RevenueCat restore flow...");
+        if (window.Android && typeof window.Android.restorePurchase === 'function') {
+            window.Android.restorePurchase();
         } else {
-            console.log("Using URL trigger for restore...");
-            window.location.href = "quickcalculator://restore";
+            console.log("Android interface for RevenueCat not found. Is this a web browser?");
+             toast({
+                title: "In-App Purchases Not Available",
+                description: "Purchases can only be restored from the Android app.",
+                variant: "destructive"
+            });
         }
     };
     
