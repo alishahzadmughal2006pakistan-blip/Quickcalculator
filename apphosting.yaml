@@ -1,7 +1,15 @@
-# Settings to manage and configure a Firebase App Hosting backend.
+=# Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
-
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
+  # The server bundle of your Next.js app is memory-intensive.
+  # We recommend setting this to at least 1GiB for production apps.
+  minInstances: 0
   maxInstances: 1
+  memoryMiB: 512
+# Static content is cached by default.
+# https://firebase.google.com/docs/app-hosting/configure#cache-control
+headers:
+  - source: /_next/static/**
+    headers:
+      - key: Cache-Control
+        value: public, max-age=31536000, immutable
