@@ -4,7 +4,7 @@ runConfig:
   # The server bundle of your Next.js app is memory-intensive.
   # We recommend setting this to at least 1GiB for production apps.
   minInstances: 0
-  maxInstances: 1
+  maxInstances: 100
   memoryMiB: 512
 # Static content is cached by default.
 # https://firebase.google.com/docs/app-hosting/configure#cache-control
