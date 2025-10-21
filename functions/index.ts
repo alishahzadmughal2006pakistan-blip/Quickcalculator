@@ -1,18 +1,18 @@
+
 import { onCall } from "firebase-functions/v2/https";
 import { initializeApp } from "firebase-admin/app";
-import { genkit, ai } from "genkit";
-import { firebase } from "genkit/plugins/firebase";
+import { genkit } from "genkit";
+import { firebase } from "@genkit-ai/google-cloud";
 import { googleAI } from "@genkit-ai/google-genai";
 import * as z from "zod";
 
 initializeApp();
 
-genkit({
+export const ai = genkit({
   plugins: [
     firebase(),
     googleAI(),
   ],
-  logLevel: "debug",
   enableTracingAndMetrics: true,
 });
 
@@ -31,7 +31,7 @@ const loanAffordabilityFlow = ai.defineFlow(
     inputSchema: LoanAffordabilityInputSchema,
     outputSchema: LoanAffordabilityOutputSchema,
   },
-  async (input) => {
+  async (input: z.infer<typeof LoanAffordabilityInputSchema>) => {
     const prompt = `Based on a monthly income of $${input.monthlyIncome} and monthly debt payments of $${input.monthlyDebts}, provide a one-sentence suggestion about what size loan this person might be able to afford. Consider a debt-to-income ratio of around 36-43% as a common benchmark. Be encouraging and provide a general estimate (e.g., 'a small personal loan', 'a modest car loan', 'a significant mortgage').`;
 
     const { output } = await ai.generate({
