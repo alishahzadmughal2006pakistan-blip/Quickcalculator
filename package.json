@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "gcp-build": "export GOOGLE_NODE_RUN_SCRIPTS= && next build"
+    "gcp-build": "npm install --legacy-peer-deps && next build"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
