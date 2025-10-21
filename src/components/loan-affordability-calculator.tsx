@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { DollarSign, Loader } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from '@/lib/firebase'; // Assuming you have firebase initialized
+import { app } from '@/lib/firebase'; 
 
 const LoanAffordabilityCalculator = () => {
     const [monthlyIncome, setMonthlyIncome] = useState('');
@@ -52,7 +53,6 @@ const LoanAffordabilityCalculator = () => {
 
         startTransition(async () => {
             try {
-                // This is the new way to call our separate Cloud Function
                 const functions = getFunctions(app, 'us-central1');
                 const generateSuggestion = httpsCallable(functions, 'loanAffordability');
                 
