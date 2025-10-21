@@ -5,13 +5,14 @@
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
+    "build": "tsc",
+    "deploy": "npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
   "engines": {
     "node": "20"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "@genkit-ai/google-genai": "^1.2.0",
     "firebase-admin": "^12.2.0",
