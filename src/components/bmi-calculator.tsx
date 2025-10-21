@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { generateBmiSuggestion } from '@/ai/flows/bmi-suggestion-flow';
 import { Loader } from 'lucide-react';
 
 const BmiCalculator = () => {
@@ -18,8 +17,6 @@ const BmiCalculator = () => {
   const [bmi, setBmi] = useState<number | null>(null);
   const [bmiCategory, setBmiCategory] = useState('');
   const [categoryColor, setCategoryColor] = useState('');
-  const [suggestion, setSuggestion] = useState('');
-  const [isPending, startTransition] = useTransition();
 
   const calculateBmi = () => {
     const weightNum = parseFloat(weight);
@@ -29,7 +26,6 @@ const BmiCalculator = () => {
       setBmi(null);
       setBmiCategory('');
       setCategoryColor('');
-      setSuggestion('');
       return;
     }
 
@@ -59,20 +55,9 @@ const BmiCalculator = () => {
     }
     setBmiCategory(category);
     setCategoryColor(color);
-
-    startTransition(async () => {
-        try {
-            const result = await generateBmiSuggestion({ bmi: bmiValue, category: category });
-            setSuggestion(result.suggestion);
-        } catch (e) {
-            console.error(e);
-            setSuggestion('Could not generate a suggestion at this time.');
-        }
-    });
   };
 
   useEffect(() => {
-    // This effect will run when the user stops typing for 500ms
     const handler = setTimeout(() => {
         if(weight && height) {
             calculateBmi();
@@ -118,9 +103,6 @@ const BmiCalculator = () => {
             <p className={cn("font-semibold", categoryColor)}>
               {bmiCategory}
             </p>
-            <div className="text-sm text-muted-foreground min-h-[40px] flex items-center justify-center px-4">
-              {isPending ? <Loader className="animate-spin" /> : <p>{suggestion}</p>}
-            </div>
           </div>
         )}
         
