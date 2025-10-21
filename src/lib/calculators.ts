@@ -13,7 +13,7 @@ import BasicCalculator from '@/components/calculator';
 import type { ComponentType } from 'react';
 import BmiCalculator from '@/components/bmi-calculator';
 import LoanAffordabilityCalculator from '@/components/loan-affordability-calculator';
-import TaxCalculator from '@/components/tax-calculator';
+// import TaxCalculator from '@/components/tax-calculator';
 
 
 // AI-powered calculators have been removed to resolve a persistent deployment issue.
