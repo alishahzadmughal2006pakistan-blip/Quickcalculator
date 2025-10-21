@@ -95,4 +95,104 @@ fun showRewardedAd() {
 
 ## 2. RevenueCat Configuration
 
-Your RevenueCat API keys should be configured according to their official documentation, usually during your Application's `onCreate` method. The `WebAppInterface` will then call your purchase and restore logic that you build using the RevenueCat SDK.
+To configure RevenueCat, you need to initialize their SDK when your Android application starts and then handle the purchase/restore calls from the WebView.
+
+**Your Public Google API Key:** `goog_YDCdABbihLyFKRtAuJLBioecDWZ`
+
+### Step 2.1: Initialize the SDK
+
+This is typically done in your `Application` class. If you don't have one, you'll need to create it and register it in your `AndroidManifest.xml`.
+
+**File:** `(YourApplication).kt`
+```kotlin
+import android.app.Application
+import com.revenuecat.purchases.Purchases
+import com.revenuecat.purchases.PurchasesConfiguration
+
+class MainApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        val builder = PurchasesConfiguration.Builder(this, "goog_YDCdABbihLyFKRtAuJLBioecDWZ")
+        Purchases.configure(builder.build())
+    }
+}
+```
+**File:** `AndroidManifest.xml` (make sure to add the `android:name` attribute)
+```xml
+<application
+    android:name=".MainApplication"
+    ...>
+    <!-- ... -->
+</application>
+```
+
+### Step 2.2: Implement Purchase Logic in `WebAppInterface`
+
+Your `WebAppInterface.kt` will use the RevenueCat SDK to handle calls from the web app.
+
+**File:** `WebAppInterface.kt`
+```kotlin
+// In your WebAppInterface.kt
+import android.app.Activity
+import android.webkit.JavascriptInterface
+import com.revenuecat.purchases.Purchases
+import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.purchasePackageWith
+import com.revenuecat.purchases.restorePurchasesWith
+
+// ... (assuming your WebAppInterface has access to the main Activity)
+class WebAppInterface(private val activity: Activity, ...) {
+
+    @JavascriptInterface
+    fun purchasePremium() {
+        // Run on the main UI thread
+        activity.runOnUiThread {
+            Purchases.sharedInstance.getOfferingsWith(
+                onError = { /* Handle error */ },
+                onSuccess = { offerings ->
+                    offerings.current?.let {
+                        // Assuming you have a package in your "default" offering
+                        val packageToPurchase = it.availablePackages.firstOrNull()
+                        if (packageToPurchase != null) {
+                            Purchases.sharedInstance.purchasePackageWith(
+                                activity,
+                                packageToPurchase,
+                                onError = { error, userCancelled ->
+                                    if (!userCancelled) {
+                                        // Handle error, maybe dispatch a 'purchaseFailed' event
+                                    }
+
+                                },
+                                onSuccess = { _, customerInfo ->
+                                    // Check if the user now has the 'premium' entitlement
+                                    if (customerInfo.entitlements.all["premium"]?.isActive == true) {
+                                        dispatchPurchaseSuccess()
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    @JavascriptInterface
+    fun restorePurchase() {
+        activity.runOnUiThread {
+            Purchases.sharedInstance.restorePurchasesWith(
+                onError = { /* Handle error */ },
+                onSuccess = { customerInfo ->
+                    if (customerInfo.entitlements.all["premium"]?.isActive == true) {
+                        dispatchPurchaseRestored()
+                    } else {
+                        dispatchNoPurchaseFound()
+                    }
+                }
+            )
+        }
+    }
+    
+    // ... include the dispatch functions here (dispatchPurchaseSuccess, etc.)
+}
+```
