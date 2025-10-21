@@ -7,11 +7,7 @@
       "**/node_modules/**"
     ],
     "frameworksBackend": {
-      "region": "us-central1",
-      "backendId": "calculatorplus"
-    },
-    "predeploy": [
-      "npm install --legacy-peer-deps"
-    ]
+      "region": "us-central1"
+    }
   }
 }

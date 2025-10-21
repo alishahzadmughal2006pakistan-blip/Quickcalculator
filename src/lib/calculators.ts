@@ -1,5 +1,4 @@
 import TipCalculator from '@/components/tip-calculator';
-import BmiCalculator from '@/components/bmi-calculator';
 import PercentageCalculator from '@/components/percentage-calculator';
 import AgeCalculator from '@/components/age-calculator';
 import UnitConverter from '@/components/unit-converter';
@@ -12,6 +11,10 @@ import DiscountCalculator from '@/components/discount-calculator';
 import DataStorageConverter from '@/components/data-storage-converter';
 import BasicCalculator from '@/components/calculator';
 import type { ComponentType } from 'react';
+import BmiCalculator from '@/components/bmi-calculator';
+import LoanAffordabilityCalculator from '@/components/loan-affordability-calculator';
+import TaxCalculator from '@/components/tax-calculator';
+
 
 // AI-powered calculators have been removed to resolve a persistent deployment issue.
 export const allCalculators: { key: string, component: ComponentType<any>, title: string, category: string }[] = [
@@ -19,6 +22,8 @@ export const allCalculators: { key: string, component: ComponentType<any>, title
   { key: 'tip', component: TipCalculator, title: "Tip Calculator", category: 'free' },
   { key: 'percentage', component: PercentageCalculator, title: "Percentage Calculator", category: 'free' },
   { key: 'age', component: AgeCalculator, title: "Age Calculator", category: 'free' },
+  { key: 'discount', component: DiscountCalculator, title: "Discount Calculator", category: 'free' },
+  { key: 'bmi', component: BmiCalculator, title: "BMI Calculator", category: 'free' },
   { key: 'unit', component: UnitConverter, title: "Unit Converter", category: 'tools' },
   { key: 'date', component: DateCalculator, title: "Date Calculator", category: 'tools' },
   { key: 'data', component: DataStorageConverter, title: "Data Storage Converter", category: 'tools' },
@@ -26,8 +31,6 @@ export const allCalculators: { key: string, component: ComponentType<any>, title
   { key: 'currency', component: CurrencyConverter, title: "Currency Converter", category: 'advanced' },
   { key: 'scientific', component: ScientificCalculator, title: "Scientific Calculator", category: 'advanced' },
   { key: 'investment', component: InvestmentReturnCalculator, title: "Investment Calculator", category: 'advanced' },
-  { key: 'discount', component: DiscountCalculator, title: "Discount Calculator", category: 'free' },
-  // REMOVED: { key: 'bmi', component: BmiCalculator, title: "BMI Calculator", category: 'free' },
-  // REMOVED: { key: 'loan_affordability', component: LoanAffordabilityCalculator, title: "Loan Affordability AI", category: 'advanced' },
-  // REMOVED: { key: 'tax', component: TaxCalculator, title: "Tax Calculator", category: 'advanced' },
+  // { key: 'loan_affordability', component: LoanAffordabilityCalculator, title: "Loan Affordability AI", category: 'advanced' },
+  // { key: 'tax', component: TaxCalculator, title: "Tax Calculator", category: 'advanced' },
 ];
