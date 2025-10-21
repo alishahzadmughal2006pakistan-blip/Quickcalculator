@@ -1,6 +1,8 @@
 # Android Integration Guide (AdMob & RevenueCat)
 
-This file contains your specific IDs and a guide for integrating them into your native Android project.
+This file contains your specific IDs and a guide for integrating them into your **native Android project (Kotlin/Java)**.
+
+**Important:** These keys and code snippets belong in your Android Studio project, not in the web application code. The web app calls functions like `window.Android.showRewardedAd()`, and your native Android code must listen for these calls and use the keys below to show the actual ads.
 
 ## 1. AdMob Configuration
 
