@@ -31,6 +31,6 @@ export const allCalculators: { key: string, component: ComponentType<any>, title
   { key: 'currency', component: CurrencyConverter, title: "Currency Converter", category: 'advanced' },
   { key: 'scientific', component: ScientificCalculator, title: "Scientific Calculator", category: 'advanced' },
   { key: 'investment', component: InvestmentReturnCalculator, title: "Investment Calculator", category: 'advanced' },
-  // { key: 'loan_affordability', component: LoanAffordabilityCalculator, title: "Loan Affordability AI", category: 'advanced' },
+  { key: 'loan_affordability', component: LoanAffordabilityCalculator, title: "Loan Affordability AI", category: 'advanced' },
   // { key: 'tax', component: TaxCalculator, title: "Tax Calculator", category: 'advanced' },
 ];

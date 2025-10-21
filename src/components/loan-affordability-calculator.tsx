@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Loader } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { generateLoanAffordabilitySuggestion } from '@/ai/flows/loan-affordability-flow';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '@/lib/firebase'; // Assuming you have firebase initialized
 
 const LoanAffordabilityCalculator = () => {
     const [monthlyIncome, setMonthlyIncome] = useState('');
@@ -51,17 +52,27 @@ const LoanAffordabilityCalculator = () => {
 
         startTransition(async () => {
             try {
-                const result = await generateLoanAffordabilitySuggestion({
+                // This is the new way to call our separate Cloud Function
+                const functions = getFunctions(app, 'us-central1');
+                const generateSuggestion = httpsCallable(functions, 'loanAffordability');
+                
+                const result: any = await generateSuggestion({
                     monthlyIncome: incomeNum,
                     monthlyDebts: debtsNum,
                 });
-                setSuggestion(result.suggestion);
-            } catch (error) {
+                
+                if (result.data.suggestion) {
+                    setSuggestion(result.data.suggestion);
+                } else {
+                    throw new Error("Invalid response from AI");
+                }
+
+            } catch (error: any) {
                 console.error(error);
                 toast({
                     variant: 'destructive',
                     title: 'Calculation Failed',
-                    description: 'Could not generate a suggestion at this time. Please try again.',
+                    description: error.message || 'Could not generate a suggestion at this time. Please try again.',
                 });
             }
         });
