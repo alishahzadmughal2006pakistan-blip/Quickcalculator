@@ -2,8 +2,8 @@
 import { onCall } from "firebase-functions/v2/https";
 import { initializeApp } from "firebase-admin/app";
 import { genkit } from "genkit";
-import { googleCloud } from "@genkit-ai/google-cloud";
 import { googleAI } from "@genkit-ai/google-genai";
+import { googleCloud } from "@genkit-ai/google-cloud";
 import * as z from "zod";
 
 initializeApp();
