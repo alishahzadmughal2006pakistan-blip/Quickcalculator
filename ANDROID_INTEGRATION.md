@@ -2,7 +2,7 @@
 
 This file contains the complete code snippets you need to copy and paste into your Android Studio project. Follow these instructions exactly to connect your native Android app to the web app's features.
 
-**Your Package Name:** Make sure to replace `com.yourdomain.quickcalculator` with your app's actual package name in all the files.
+**Your Package Name:** Make sure to replace `com.plus.quickcalculator` with your app's actual package name if it's different.
 
 ---
 
@@ -72,12 +72,12 @@ Copy and paste the following, making sure to replace the existing `<application>
 
 ---
 
-## 3. Create Application Class (`app/src/main/java/com/yourdomain/quickcalculator/MainApplication.kt`)
+## 3. Create Application Class (`app/src/main/java/com/plus/quickcalculator/MainApplication.kt`)
 
 Create a new Kotlin file named `MainApplication.kt` in your main package folder and paste this code. This initializes RevenueCat when the app starts.
 
 ```kotlin
-package com.yourdomain.quickcalculator
+package com.plus.quickcalculator
 
 import android.app.Application
 import com.revenuecat.purchases.Purchases
@@ -94,20 +94,21 @@ class MainApplication : Application() {
 ```
 ---
 
-## 4. Set Up the WebView (`app/src/main/java/com/yourdomain/quickcalculator/MainActivity.kt`)
+## 4. Set Up the WebView (`app/src/main/java/com/plus/quickcalculator/MainActivity.kt`)
 
-Replace the entire contents of your `MainActivity.kt` with this code. It sets up the WebView, the native banner ad, and the JavaScript bridge.
+Replace the entire contents of your `MainActivity.kt` with this code. It sets up the WebView, the native banner ad, the JavaScript bridge, **and fixes the issue of links opening in Chrome.**
 
 ```kotlin
-package com.yourdomain.quickcalculator
+package com.plus.quickcalculator
 
 import android.os.Bundle
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
-import com.yourdomain.quickcalculator.R // Make sure this import is correct
+import com.plus.quickcalculator.R // Make sure this import is correct
 
 class MainActivity : AppCompatActivity() {
 
@@ -123,6 +124,10 @@ class MainActivity : AppCompatActivity() {
 
         // --- WebView Setup ---
         webView = findViewById(R.id.webview)
+        
+        // ** THE FIX IS HERE: Set WebViewClient to handle navigation **
+        webView.webViewClient = WebViewClient() // This line prevents links from opening in Chrome
+        
         // IMPORTANT: Enable JavaScript
         webView.settings.javaScriptEnabled = true
         // Add the interface, naming it "Android" to match window.Android in the JS
@@ -177,14 +182,15 @@ And for `res/layout/activity_main.xml`, use this:
 ```
 ---
 
-## 5. Create the Bridge (`app/src/main/java/com/yourdomain/quickcalculator/WebAppInterface.kt`)
+## 5. Create the Bridge (`app/src/main/java/com/plus/quickcalculator/WebAppInterface.kt`)
 
 Create a new Kotlin file named `WebAppInterface.kt` and paste this code. This is the bridge that handles all communication from the web app.
 
 ```kotlin
-package com.yourdomain.quickcalculator
+package com.plus.quickcalculator
 
 import android.app.Activity
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import com.google.android.gms.ads.LoadAdError
@@ -203,6 +209,7 @@ class WebAppInterface(private val activity: Activity, private val webView: WebVi
     // --- Helper functions to send events back to the WebView ---
     private fun dispatchJavaScriptEvent(eventName: String) {
         val js = "window.dispatchEvent(new Event('$eventName'));"
+        Log.d("WebAppInterface", "Dispatching event: $eventName")
         webView.post { webView.evaluateJavascript(js, null) }
     }
 
@@ -210,24 +217,30 @@ class WebAppInterface(private val activity: Activity, private val webView: WebVi
 
     @JavascriptInterface
     fun purchasePremium() {
+        Log.d("WebAppInterface", "purchasePremium called from web")
         activity.runOnUiThread {
             Purchases.sharedInstance.getOfferingsWith(
-                onError = { /* Handle error, maybe dispatch a 'purchaseFailed' event */ },
+                onError = { error -> 
+                    Log.e("WebAppInterface", "RevenueCat getOfferings error: ${error.message}")
+                },
                 onSuccess = { offerings ->
                     offerings.current?.availablePackages?.firstOrNull()?.let { packageToPurchase ->
                         Purchases.sharedInstance.purchasePackageWith(
                             activity,
                             packageToPurchase,
                             onError = { error, userCancelled ->
-                                if (!userCancelled) { /* Handle purchase error */ }
+                                if (!userCancelled) {
+                                    Log.e("WebAppInterface", "RevenueCat purchase error: ${error.message}")
+                                }
                             },
                             onSuccess = { _, customerInfo ->
                                 if (customerInfo.entitlements.all["premium"]?.isActive == true) {
+                                    Log.d("WebAppInterface", "Purchase successful, dispatching event.")
                                     dispatchJavaScriptEvent("purchaseSuccess")
                                 }
                             }
                         )
-                    }
+                    } ?: Log.d("WebAppInterface", "No available packages found in RevenueCat.")
                 }
             )
         }
@@ -235,13 +248,18 @@ class WebAppInterface(private val activity: Activity, private val webView: WebVi
 
     @JavascriptInterface
     fun restorePurchase() {
+        Log.d("WebAppInterface", "restorePurchase called from web")
         activity.runOnUiThread {
             Purchases.sharedInstance.restorePurchasesWith(
-                onError = { /* Handle error */ },
+                onError = { error ->
+                    Log.e("WebAppInterface", "RevenueCat restore error: ${error.message}")
+                },
                 onSuccess = { customerInfo ->
                     if (customerInfo.entitlements.all["premium"]?.isActive == true) {
+                        Log.d("WebAppInterface", "Restore successful, dispatching event.")
                         dispatchJavaScriptEvent("purchaseRestored")
                     } else {
+                        Log.d("WebAppInterface", "No active premium entitlement found on restore.")
                         dispatchJavaScriptEvent("noPurchaseFound")
                     }
                 }
@@ -253,18 +271,22 @@ class WebAppInterface(private val activity: Activity, private val webView: WebVi
 
     @JavascriptInterface
     fun showRewardedAd() {
+        Log.d("WebAppInterface", "showRewardedAd called from web")
         activity.runOnUiThread {
             val adRequest = AdManagerAdRequest.Builder().build()
             RewardedAd.load(activity, "ca-app-pub-6877561239291582/9245041684", adRequest, object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
+                    Log.d("WebAppInterface", "Rewarded Ad loaded successfully.")
                     ad.show(activity) {
                         // User earned the reward
+                        Log.d("WebAppInterface", "User earned reward, dispatching event.")
                         dispatchJavaScriptEvent("rewardedAdCompleted")
                     }
                 }
 
                 override fun onAdFailedToLoad(adError: LoadAdError) {
                     // Ad failed to load. Notify the web app.
+                    Log.e("WebAppInterface", "Rewarded Ad failed to load: ${adError.message}")
                     dispatchJavaScriptEvent("rewardedAdFailed")
                 }
             })
