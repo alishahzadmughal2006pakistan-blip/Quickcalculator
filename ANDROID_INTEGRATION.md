@@ -1,110 +1,84 @@
 # Android Integration Guide (AdMob & RevenueCat)
 
-This file contains your specific IDs and a guide for integrating them into your **native Android project (Kotlin/Java)**.
+This file contains the complete code snippets you need to copy and paste into your Android Studio project. Follow these instructions exactly to connect your native Android app to the web app's features.
 
-**Important:** These keys and code snippets belong in your Android Studio project, not in the web application code. The web app calls functions like `window.Android.showRewardedAd()`, and your native Android code must listen for these calls and use the keys below to show the actual ads.
+**Your Package Name:** Make sure to replace `com.yourdomain.quickcalculator` with your app's actual package name in all the files.
 
-## 1. AdMob Configuration
+---
 
-### App ID
+## 1. Add Dependencies (`app/build.gradle.kts`)
 
-Your AdMob App ID needs to be placed in your `AndroidManifest.xml` file.
+Open your `app` level `build.gradle.kts` file and add these lines to the `dependencies` block.
 
-**Your App ID:** `ca-app-pub-6877561239291582~4136825863`
+```kotlin
+// In your app/build.gradle.kts file
 
-**File:** `app/src/main/AndroidManifest.xml`
+dependencies {
 
-Add a `<meta-data>` tag within the `<application>` tag as shown below:
+    // ... your other dependencies like core-ktx, appcompat, etc.
+
+    // RevenueCat for In-App Purchases
+    implementation("com.revenuecat.purchases:purchases:7.7.0")
+    
+    // AdMob for Ads
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
+}
+```
+
+---
+
+## 2. Configure Android Manifest (`app/src/main/AndroidManifest.xml`)
+
+Copy and paste the following, making sure to replace the existing `<application>` tag. This adds internet permissions and your AdMob App ID.
 
 ```xml
-<manifest>
-    <application>
-        <!-- ... other tags -->
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Required permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.android.vending.BILLING" />
+
+    <application
+        android:name=".MainApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.QuickCalculator"
+        tools:targetApi="31">
+
+        <!-- Your AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-6877561239291582~4136825863"/>
 
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
+
 </manifest>
 ```
 
-### Ad Unit IDs
+---
 
-These IDs are used in your Kotlin/Java code to load specific ads.
+## 3. Create Application Class (`app/src/main/java/com/yourdomain/quickcalculator/MainApplication.kt`)
 
-#### Banner Ad
+Create a new Kotlin file named `MainApplication.kt` in your main package folder and paste this code. This initializes RevenueCat when the app starts.
 
-This ad should be a native `AdView` in your main activity's layout file, positioned at the bottom of the screen (below the WebView).
-
-**Your Banner Ad Unit ID:** `ca-app-pub-6877561239291582/1254871023`
-
-**Example (in your Activity):**
 ```kotlin
-// In your MainActivity.kt or equivalent
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
-// ...
+package com.yourdomain.quickcalculator
 
-lateinit var mAdView : AdView
-// ...
-
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    // ...
-    mAdView = findViewById(R.id.adView) // Make sure you have an AdView with this ID in your layout XML
-    val adRequest = AdRequest.Builder().build()
-    mAdView.loadAd(adRequest)
-}
-```
-
-#### Rewarded Ad
-
-This is loaded and shown from your `WebAppInterface` when the web app calls `window.Android.showRewardedAd()`.
-
-**Your Rewarded Ad Unit ID:** `ca-app-pub-6877561239291582/9245041684`
-
-**Example (in your `WebAppInterface.kt`):**
-```kotlin
-// In your WebAppInterface.kt or wherever you handle the rewarded ad logic
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-// ...
-
-@JavascriptInterface
-fun showRewardedAd() {
-    // Make sure to run UI-related code on the main thread
-    activity.runOnUiThread {
-        val adRequest = AdRequest.Builder().build()
-        RewardedAd.load(activity, "ca-app-pub-6877561239291582/9245041684", adRequest, object : RewardedAdLoadCallback() {
-            override fun onAdLoaded(ad: RewardedAd) {
-                ad.show(activity) {
-                    // This block is called when the user earns the reward
-                    dispatchRewardGranted() // Notify the web app
-                }
-            }
-
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                // Ad failed to load. Notify the web app so it can show a toast.
-                dispatchAdFailed()
-            }
-        })
-    }
-}
-```
-
-## 2. RevenueCat Configuration
-
-To configure RevenueCat, you need to initialize their SDK when your Android application starts and then handle the purchase/restore calls from the WebView.
-
-**Your Public Google API Key:** `goog_YDCdABbihLyFKRtAuJLBioecDWZ`
-
-### Step 2.1: Initialize the SDK
-
-This is typically done in your `Application` class. If you don't have one, you'll need to create it and register it in your `AndroidManifest.xml`.
-
-**File:** `(YourApplication).kt`
-```kotlin
 import android.app.Application
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
@@ -112,65 +86,147 @@ import com.revenuecat.purchases.PurchasesConfiguration
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        // Your RevenueCat Public Google API Key
         val builder = PurchasesConfiguration.Builder(this, "goog_YDCdABbihLyFKRtAuJLBioecDWZ")
         Purchases.configure(builder.build())
     }
 }
 ```
-**File:** `AndroidManifest.xml` (make sure to add the `android:name` attribute)
-```xml
-<application
-    android:name=".MainApplication"
-    ...>
-    <!-- ... -->
-</application>
+---
+
+## 4. Set Up the WebView (`app/src/main/java/com/yourdomain/quickcalculator/MainActivity.kt`)
+
+Replace the entire contents of your `MainActivity.kt` with this code. It sets up the WebView, the native banner ad, and the JavaScript bridge.
+
+```kotlin
+package com.yourdomain.quickcalculator
+
+import android.os.Bundle
+import android.webkit.WebView
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
+import com.yourdomain.quickcalculator.R // Make sure this import is correct
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var webView: WebView
+    private lateinit var adView: AdView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Initialize AdMob
+        MobileAds.initialize(this) {}
+
+        // --- WebView Setup ---
+        webView = findViewById(R.id.webview)
+        // IMPORTANT: Enable JavaScript
+        webView.settings.javaScriptEnabled = true
+        // Add the interface, naming it "Android" to match window.Android in the JS
+        webView.addJavascriptInterface(WebAppInterface(this, webView), "Android")
+        // Load your Firebase Hosting URL
+        webView.loadUrl("https://studio-2681875480-fe389.web.app")
+
+        // --- Banner Ad Setup ---
+        adView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
+    }
+
+    // Handle back press to navigate in WebView history
+    override fun onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
+    }
+}
 ```
 
-### Step 2.2: Implement Purchase Logic in `WebAppInterface`
+And for `res/layout/activity_main.xml`, use this:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
-Your `WebAppInterface.kt` will use the RevenueCat SDK to handle calls from the web app.
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/adView" />
 
-**File:** `WebAppInterface.kt`
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        app:adSize="BANNER"
+        app:adUnitId="ca-app-pub-6877561239291582/1254871023">
+    </com.google.android.gms.ads.AdView>
+
+</RelativeLayout>
+```
+---
+
+## 5. Create the Bridge (`app/src/main/java/com/yourdomain/quickcalculator/WebAppInterface.kt`)
+
+Create a new Kotlin file named `WebAppInterface.kt` and paste this code. This is the bridge that handles all communication from the web app.
+
 ```kotlin
-// In your WebAppInterface.kt
+package com.yourdomain.quickcalculator
+
 import android.app.Activity
 import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.revenuecat.purchases.Package
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.getOfferingsWith
 import com.revenuecat.purchases.purchasePackageWith
 import com.revenuecat.purchases.restorePurchasesWith
 
-// ... (assuming your WebAppInterface has access to the main Activity)
-class WebAppInterface(private val activity: Activity, ...) {
+
+class WebAppInterface(private val activity: Activity, private val webView: WebView) {
+
+    // --- Helper functions to send events back to the WebView ---
+    private fun dispatchJavaScriptEvent(eventName: String) {
+        val js = "window.dispatchEvent(new Event('$eventName'));"
+        webView.post { webView.evaluateJavascript(js, null) }
+    }
+
+    // --- RevenueCat Methods ---
 
     @JavascriptInterface
     fun purchasePremium() {
-        // Run on the main UI thread
         activity.runOnUiThread {
             Purchases.sharedInstance.getOfferingsWith(
-                onError = { /* Handle error */ },
+                onError = { /* Handle error, maybe dispatch a 'purchaseFailed' event */ },
                 onSuccess = { offerings ->
-                    offerings.current?.let {
-                        // Assuming you have a package in your "default" offering
-                        val packageToPurchase = it.availablePackages.firstOrNull()
-                        if (packageToPurchase != null) {
-                            Purchases.sharedInstance.purchasePackageWith(
-                                activity,
-                                packageToPurchase,
-                                onError = { error, userCancelled ->
-                                    if (!userCancelled) {
-                                        // Handle error, maybe dispatch a 'purchaseFailed' event
-                                    }
-
-                                },
-                                onSuccess = { _, customerInfo ->
-                                    // Check if the user now has the 'premium' entitlement
-                                    if (customerInfo.entitlements.all["premium"]?.isActive == true) {
-                                        dispatchPurchaseSuccess()
-                                    }
+                    offerings.current?.availablePackages?.firstOrNull()?.let { packageToPurchase ->
+                        Purchases.sharedInstance.purchasePackageWith(
+                            activity,
+                            packageToPurchase,
+                            onError = { error, userCancelled ->
+                                if (!userCancelled) { /* Handle purchase error */ }
+                            },
+                            onSuccess = { _, customerInfo ->
+                                if (customerInfo.entitlements.all["premium"]?.isActive == true) {
+                                    dispatchJavaScriptEvent("purchaseSuccess")
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
                 }
             )
@@ -184,15 +240,35 @@ class WebAppInterface(private val activity: Activity, ...) {
                 onError = { /* Handle error */ },
                 onSuccess = { customerInfo ->
                     if (customerInfo.entitlements.all["premium"]?.isActive == true) {
-                        dispatchPurchaseRestored()
+                        dispatchJavaScriptEvent("purchaseRestored")
                     } else {
-                        dispatchNoPurchaseFound()
+                        dispatchJavaScriptEvent("noPurchaseFound")
                     }
                 }
             )
         }
     }
     
-    // ... include the dispatch functions here (dispatchPurchaseSuccess, etc.)
+    // --- AdMob Rewarded Ad Method ---
+
+    @JavascriptInterface
+    fun showRewardedAd() {
+        activity.runOnUiThread {
+            val adRequest = AdManagerAdRequest.Builder().build()
+            RewardedAd.load(activity, "ca-app-pub-6877561239291582/9245041684", adRequest, object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedAd) {
+                    ad.show(activity) {
+                        // User earned the reward
+                        dispatchJavaScriptEvent("rewardedAdCompleted")
+                    }
+                }
+
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    // Ad failed to load. Notify the web app.
+                    dispatchJavaScriptEvent("rewardedAdFailed")
+                }
+            })
+        }
+    }
 }
 ```
