@@ -3,8 +3,8 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Gem, Pin, PinOff, Trash2, History, FileText } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Gem, Pin, PinOff, Trash2, History, FileText, CheckCircle, XCircle } from 'lucide-react';
 import BasicCalculator from '@/components/calculator';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,49 @@ declare global {
         }
     }
 }
+
+const AndroidBridgeStatus = () => {
+    const [bridgeStatus, setBridgeStatus] = useState({
+        isAvailable: false,
+        hasPurchase: false,
+        hasRestore: false,
+    });
+
+    useEffect(() => {
+        // This check runs only on the client-side
+        if (typeof window !== 'undefined') {
+            const isAvailable = window.Android !== undefined;
+            const hasPurchase = !!(window.Android && typeof window.Android.purchasePremium === 'function');
+            const hasRestore = !!(window.Android && typeof window.Android.restorePurchase === 'function');
+            setBridgeStatus({ isAvailable, hasPurchase, hasRestore });
+        }
+    }, []);
+
+    const StatusItem = ({ label, isConnected }: { label: string, isConnected: boolean }) => (
+        <div className={`flex items-center justify-between text-xs ${isConnected ? 'text-green-500' : 'text-destructive'}`}>
+            <p>{label}</p>
+            <div className="flex items-center gap-1">
+                {isConnected ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                <span>{isConnected ? 'Connected' : 'Missing'}</span>
+            </div>
+        </div>
+    );
+
+    return (
+        <Card className="bg-muted/50 mt-4">
+            <CardHeader className="p-3">
+                <CardTitle className="text-sm">Native Bridge Diagnostics</CardTitle>
+                <CardDescription className="text-xs">For testing connection to the Android app.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-3 pt-0 space-y-1">
+                <StatusItem label="Android Interface (window.Android)" isConnected={bridgeStatus.isAvailable} />
+                <StatusItem label="purchasePremium() function" isConnected={bridgeStatus.hasPurchase} />
+                <StatusItem label="restorePurchase() function" isConnected={bridgeStatus.hasRestore} />
+            </CardContent>
+        </Card>
+    );
+};
+
 
 const SettingsScreen = () => {
     const { soundEnabled, toggleSound, isPremium, setPremium } = useSettings();
@@ -197,6 +240,7 @@ const SettingsScreen = () => {
                             <History className="mr-2 h-4 w-4" />
                            Restore Purchase
                         </Button>
+                        <AndroidBridgeStatus />
                     </div>
                 )}
                  {isPremium && (
