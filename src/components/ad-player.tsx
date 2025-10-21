@@ -54,8 +54,9 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
         // 4. When the user successfully watches the ad, the native app MUST call
         //    the `window.dispatchEvent(new Event('rewardedAdCompleted'))`
         //    JavaScript event to notify this web app.
-        // 5. If the ad fails or is closed, the native app should call
-        //    `window.dispatchEvent(new Event('rewardedAdDismissed'))`.
+        // 5. If the ad fails (e.g., user is offline), the native app should call
+        //    `window.dispatchEvent(new Event('rewardedAdFailed'))`.
+        // 6. If the ad is dismissed early, call `rewardedAdDismissed`.
         
         if (window.Android && typeof window.Android.showRewardedAd === 'function') {
             window.Android.showRewardedAd();
@@ -96,12 +97,24 @@ export const AdPlayer = ({ isOpen, onClose, onComplete, featureName }: AdPlayerP
             onClose();
         };
 
+        const handleAdFailed = () => {
+            console.log("Rewarded ad failed to load.");
+            toast({
+                variant: "destructive",
+                title: "Ad Not Available",
+                description: "Could not load ad. Please check your internet connection.",
+            });
+            onClose();
+        };
+
         window.addEventListener('rewardedAdCompleted', handleAdCompleted);
         window.addEventListener('rewardedAdDismissed', handleAdDismissed);
+        window.addEventListener('rewardedAdFailed', handleAdFailed);
 
         return () => {
             window.removeEventListener('rewardedAdCompleted', handleAdCompleted);
             window.removeEventListener('rewardedAdDismissed', handleAdDismissed);
+            window.removeEventListener('rewardedAdFailed', handleAdFailed);
         };
     }, [onComplete, onClose, featureName, toast]);
 
