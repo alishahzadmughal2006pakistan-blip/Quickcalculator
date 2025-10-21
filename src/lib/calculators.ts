@@ -12,8 +12,6 @@ import DataStorageConverter from '@/components/data-storage-converter';
 import BasicCalculator from '@/components/calculator';
 import type { ComponentType } from 'react';
 import BmiCalculator from '@/components/bmi-calculator';
-import LoanAffordabilityCalculator from '@/components/loan-affordability-calculator';
-// import TaxCalculator from '@/components/tax-calculator';
 
 
 // AI-powered calculators have been removed to resolve a persistent deployment issue.
@@ -31,6 +29,4 @@ export const allCalculators: { key: string, component: ComponentType<any>, title
   { key: 'currency', component: CurrencyConverter, title: "Currency Converter", category: 'advanced' },
   { key: 'scientific', component: ScientificCalculator, title: "Scientific Calculator", category: 'advanced' },
   { key: 'investment', component: InvestmentReturnCalculator, title: "Investment Calculator", category: 'advanced' },
-  { key: 'loan_affordability', component: LoanAffordabilityCalculator, title: "Loan Affordability AI", category: 'advanced' },
-  // { key: 'tax', component: TaxCalculator, title: "Tax Calculator", category: 'advanced' },
 ];
