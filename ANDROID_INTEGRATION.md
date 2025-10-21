@@ -282,6 +282,14 @@ class WebAppInterface(private val activity: Activity, private val webView: WebVi
                         Log.d("WebAppInterface", "User earned reward, dispatching event.")
                         dispatchJavaScriptEvent("rewardedAdCompleted")
                     }
+
+                    ad.fullScreenContentCallback = object : com.google.android.gms.ads.FullScreenContentCallback() {
+                        override fun onAdDismissedFullScreenContent() {
+                            // Ad was dismissed. You can notify the web app if needed.
+                            Log.d("WebAppInterface", "Rewarded Ad was dismissed.")
+                            dispatchJavaScriptEvent("rewardedAdDismissed")
+                        }
+                    }
                 }
 
                 override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -293,4 +301,3 @@ class WebAppInterface(private val activity: Activity, private val webView: WebVi
         }
     }
 }
-```
