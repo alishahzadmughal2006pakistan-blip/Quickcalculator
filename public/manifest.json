@@ -1,0 +1,21 @@
+{
+  "name": "Quick Calculator+",
+  "short_name": "QuickCalc+",
+  "description": "A feature-rich calculator with basic and advanced operations, calculation history, and a unit converter.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#03A9F4",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

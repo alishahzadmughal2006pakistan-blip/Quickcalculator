@@ -208,35 +208,6 @@ const SettingsScreen = () => {
                         </div>
                     </div>
                 )}
-                {/*
-                <Button 
-                    onClick={() => {
-                        console.log("=== EMERGENCY DIAGNOSTIC ===");
-                        console.log("window.handlePurchase:", typeof window.handlePurchase);
-                        console.log("window.Android:", typeof window.Android);
-                        if (typeof window.Android !== 'undefined' && window.Android.purchasePremium) {
-                            console.log("✅ Method 1: Android object available");
-                            window.Android.purchasePremium();
-                            window.Android.testBridge();
-                            return;
-                        }
-                        if (typeof window.handlePurchase === 'function') {
-                            console.log("✅ Method 2: handlePurchase available");
-                            window.handlePurchase();
-                            return;
-                        }
-                        console.log("❌ No Android methods available, using URL fallback");
-                        window.location.href = "quickcalculator://purchase";
-                    }}
-                    style={{ 
-                        backgroundColor: 'orange', 
-                        color: 'white',
-                        margin: '10px 0'
-                    }}
-                >
-                    🚨 EMERGENCY DIAGNOSTIC
-                </Button>
-                */}
             </CardContent>
         </Card>
     );
